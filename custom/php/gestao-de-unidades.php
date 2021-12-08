@@ -34,25 +34,29 @@ if ($subitemTypes->num_rows == 0) {
             <th>subitem</th>
         </tr>";
 
-    // For each subitem type table row: kg, cm
-    // Subitem type: id, name 
-    foreach($subitemTypes->fetch_all() as $subitemType) {
+    //* For each subitem type
+    foreach($subitemTypes as $subitemType) {
+
 
         echo "<tr>"; // Begin table row
 
-        echo "<td>" . $subitemType[0] . "</td>"; // First column: id
-        echo "<td>" . $subitemType[1] . "</td>"; // Second column: name
+        echo "<td>" . $subitemType["id"] . "</td>"; //* First column
+        echo "<td>" . $subitemType["name"] . "</td>"; //* Second column
 
         echo "<td>"; // Third column: nomes subitens que têm respetivo tipo de unidade, aparecendo dentro de parêntesis o nome do item a que pertence esse subitem
 
-        // Query the subitems that have the same subitem type of this foreach loop instance subitem type
-        $subitems = $databaseConnection->query("SELECT * FROM subitem WHERE subitem.unit_type_id = " . $subitemType[0]);
-        // print_r($subitems);
+        // Query all the "subitems" that have the same "subitem type" of this loop "subitem type"
+        $subitems = $databaseConnection->query("SELECT * FROM subitem WHERE subitem.unit_type_id = " . $subitemType["id"]);
 
-        // For each subitem table row that has the same subitem type of this foreach loop instance subitem type
+        //* For each "subitem" that has the same "subitem type" of this loop "subitem type"
         foreach($subitems as $subitem) {
-            print_r($subitem);
-            echo $subitem["name"] . ", "; // name
+
+            echo $subitem["name"];
+
+            // Query the "item" parent of the loop "subtitem"
+            $item = $databaseConnection->query("SELECT * FROM item WHERE item.id = " . $subitem["item_id"]);
+            echo " (". $item->fetch_assoc()["name"] . "), ";
+
         }
 
         echo "</td>";
