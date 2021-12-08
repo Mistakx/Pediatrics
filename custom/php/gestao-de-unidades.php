@@ -10,16 +10,51 @@ printCurrentUsername($currentUser);
 printCurrentUserRoles($currentUser);
 
 //* Database information
-$queryTipos = "SELECT * FROM child";
-$mySQL = connectToDatabase();
-$tabelaTipos = mysqli_query($mySQL, $queryTipos);
+$databaseConnection = connectToDatabase();
+$query = "SELECT * FROM subitem_unit_type";
+// $query = "SELECT * FROM child";
+$queryResult = $databaseConnection->query($query);
+
+// echo "\nQuery result:\n";
+// print_r($queryResult);
+echo "\n";
+
+//* If there are no unit types in the database
+if ($queryResult->num_rows == 0) {
+    
+    echo "<strong> There are no unit types.</strong>";
+
+} else { //* If there are unit types in the database
+
+    // Table beginning
+    echo "<table>";
+
+    // Table header
+    echo "<tr>
+            <th>id</th>
+            <th>unidade</th>
+            <th>subitem</th>
+        </tr>";
+
+    // For each subitem type table row: kg, cm
+    // Subitem type: id, name 
+    foreach($queryResult->fetch_all() as $queryArray) {
+
+        echo "<tr>";
+        
+        echo "<td>" . $queryArray[0] . "</td>"; // id
+        echo "<td>" . $queryArray[1] . "</td>"; // name
+
+        echo "</tr>";
+
+    }
+
+    // Table ending
+    echo "</table>"; 
 
 
-//SE HÁ TIPOS DE ITEM NA BASE DE DADOS:
-if (mysqli_num_rows($tabelaTipos) > 0) {
-    //CABEÇALHO DA TABELA:
-    echo "<table class='tabela'>";
-    echo "<tr class='row'><th class='textoTabela cell'>tipo de item</th><th class='textoTabela cell'>id</th><th class='textoTabela cell'>nome do item</th><th class='textoTabela cell'>estado</th><th class='textoTabela cell'>ação</th></tr>";
 }
+
+
 
 ?> 
