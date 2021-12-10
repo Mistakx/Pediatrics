@@ -29,7 +29,7 @@ function handle_request($databaseConnection) {
 
 
         } else { //* Invalid unit type name
-            echo "O nome da unidade enviada foi inválido";
+            echo "<script>alert('O nome da unidade enviada foi inválido.')</script>";
             echo "<br><br>";
         }
     
@@ -98,8 +98,6 @@ function insert_unit_type_form() {
     echo "</form>"; // Form ending
     
 }
-
-echo "DEBUG";
 
 //* Verify if the user is logged in, and if it has the manage_unit_types capability
 verifyLoginAndCapability("manage_unit_types");
