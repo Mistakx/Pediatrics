@@ -5,12 +5,12 @@ require_once("custom/php/common.php");
 
 function handle_request($databaseConnection) {
 
-    if ( array_key_exists("Estado", $_REQUEST) and $_REQUEST['Estado'] == "Inserir") { //* If the user has inserted some unit type in the database
+    if ( array_key_exists("Estado", $_REQUEST) and $_REQUEST['Estado'] == "Inserir") { //* User has inserted some unit type
 
-        if ( array_key_exists("Nome", $_REQUEST) and $_REQUEST['Nome'] != "") { //* Valid unit type name
+        if ( array_key_exists("Nome", $_REQUEST) and $_REQUEST['Nome'] != "") { //* Non empty unit type name
 
             $unitInserted = $_REQUEST['Nome'];
-            $unitNamesInDatabase = $databaseConnection->query("SELECT name FROM subitem_unit_type");
+            $unitNamesInDatabase = $databaseConnection->query("SELECT name FROM subitem_unit_type"); // TODO: Not necessary, query was executed before on the main function, and can be sent as parameter
             $unitNameAlreadyExists = FALSE;
             foreach ($unitNamesInDatabase as $unitNameInDatabase) { // Check if unit already exists in the database                
                 if ($unitInserted == $unitNameInDatabase["name"]) {
@@ -23,7 +23,7 @@ function handle_request($databaseConnection) {
                 echo "<script>alert('O valor $unitInserted já existe na base de dados.')</script>";
             } else {
                 $databaseConnection->query("INSERT INTO subitem_unit_type (name) VALUES ('$unitInserted')");
-                // echo "<script>alert('Foi inserido o valor $unitInserted')</script>";
+                echo "<script>alert('Foi inserido o valor $unitInserted.')</script>";
             }
 
 
@@ -33,7 +33,7 @@ function handle_request($databaseConnection) {
             echo "<br><br>";
         }
     
-    } else { //* If the user entered the page as usual, without sending any unit type to the database
+    } else { //* If the user entered the page as usual, without inserting any unit type
         return;
     }
 
@@ -43,14 +43,13 @@ function unit_types_table($databaseConnection) {
 
     $subitemTypes = $databaseConnection->query("SELECT * FROM subitem_unit_type");
 
-
     echo "<table>"; // Table beginning
 
     // Table header
     echo "<tr>
-            <th>id</th>
-            <th>unidade</th>
-            <th>subitem</th>
+            <th> <strong> id </strong> </th>
+            <th> <strong> unidade </strong> </th>
+            <th> <strong> subitem </strong> </th>
         </tr>";
 
     //* For each subitem type
@@ -117,7 +116,7 @@ handle_request($databaseConnection);
 
 if ($subitemTypes->num_rows == 0) { //* If there are no unit types in the database
      
-    echo "<strong> There are no unit types.</strong>";
+    echo "<strong> Não há tipos de unidades.</strong>";
     
 } else { //* If there are unit types in the database
 
