@@ -1,4 +1,3 @@
-
 <?php 
 // kU3o7LHl8HKq
 
@@ -35,9 +34,6 @@ function allowed_values_table($databaseConnection) {
         // Item name
         $itemRow.="<td rowspan=mistakxItemSpan> $itemNameAndID[itemName] </td>";
 
-        // Item ID
-        $itemRow.="<td rowspan=mistakxItemSpan> $itemNameAndID[itemID] </td>";
-
         //* Query all associated subitem names and IDs
         $subitemsNamesAndIDs = $databaseConnection->query("SELECT 
         subitem.name as subitemName,
@@ -45,8 +41,8 @@ function allowed_values_table($databaseConnection) {
         FROM subitem
         WHERE subitem.item_id = $itemNameAndID[itemID]");
         $subitemI = 0;
-        print_r("SUBITEMS OF $itemNameAndID[itemName]:\n");
-        print_r($subitemsNamesAndIDs);
+        // print_r("SUBITEMS OF $itemNameAndID[itemName]:\n");
+        // print_r($subitemsNamesAndIDs);
         foreach($subitemsNamesAndIDs as $subitemNameAndID) {
 
             //! Subitem table information corresponding to this loop iteration's subitem
@@ -55,14 +51,15 @@ function allowed_values_table($databaseConnection) {
 
             if ($subitemI != 0) {$subitemRow.="<tr>";}
 
-            // Subitem name
-            $subitemRow.="<td rowspan=mistakxSubitemSpan> $subitemNameAndID[subitemName] </td>";
-    
             // Subitem ID
             $subitemRow.="<td rowspan=mistakxSubitemSpan> $subitemNameAndID[subitemID] </td>";
 
+            // Subitem name
+            $subitemRow.="<td rowspan=mistakxSubitemSpan> $subitemNameAndID[subitemName] </td>";
+
             //* Query all associated allowed values and IDs
             $allowedValuesAndIDs = $databaseConnection->query("SELECT 
+            subitem_allowed_value.id as allowedValueID, 
             subitem_allowed_value.value as allowedValue, 
             subitem_allowed_value.state as allowedValueState
             FROM subitem_allowed_value 
@@ -77,6 +74,9 @@ function allowed_values_table($databaseConnection) {
                 $allowedValueRow = "";
 
                 if ($allowedValueI != 0) {$allowedValueRow.="<tr>";}                
+
+                // Allowed value ID
+                $allowedValueRow.="<td> $allowedValueAndID[allowedValueID] </td>";
 
                 // Allowed value
                 $allowedValueRow.="<td> $allowedValueAndID[allowedValue] </td>";
@@ -96,12 +96,14 @@ function allowed_values_table($databaseConnection) {
 
             }
 
+            print_r("</tr>");
             if ($subitemI != 0) {$subitemRow.="</tr>";}
             if ($subitemRowSpan == 0) { $subitemRowSpan++; }
             $itemRowSpan = $itemRowSpan + $subitemRowSpan;
             $itemRow.= str_replace("mistakxSubitemSpan", strval($subitemRowSpan),$subitemRow);
             $subitemRowSpan = 0;
             $subitemRow = "";
+            $subitemI++;
 
         }
 
@@ -114,8 +116,6 @@ function allowed_values_table($databaseConnection) {
         // print_r($itemRow);
         $itemRowSpan = 0;
         $itemRow = "";
-
-        break;
 
     }
 
