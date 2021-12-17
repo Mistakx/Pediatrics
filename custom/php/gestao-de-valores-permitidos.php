@@ -5,6 +5,8 @@ require_once("custom/php/common.php");
 
 function allowed_values_table($databaseConnection) {
 
+    print_r("DEBUG13");
+
     echo "<table>"; //* Table beginning
     
     //* Table header
@@ -18,14 +20,13 @@ function allowed_values_table($databaseConnection) {
             <th>ação</th>
     </tr>";
 
-    //* Query all item names and IDs
+    //! Query all item names and IDs
     $itemsNamesAndIDs = $databaseConnection->query("SELECT 
     item.name as itemName, 
     item.id as itemID
     FROM item");
     foreach ($itemsNamesAndIDs as $itemNameAndID) {
         
-        //! Item table information corresponding to this loop iteration's item
         $itemRowSpan = 0;
         $itemRow = "";
 
@@ -34,22 +35,20 @@ function allowed_values_table($databaseConnection) {
         // Item name
         $itemRow.="<td rowspan=mistakxItemSpan> $itemNameAndID[itemName] </td>";
 
-        //* Query all associated subitem names and IDs
+        //! Query all associated subitem names and IDs
         $subitemsNamesAndIDs = $databaseConnection->query("SELECT 
         subitem.name as subitemName,
         subitem.id as subitemID
         FROM subitem
         WHERE subitem.item_id = $itemNameAndID[itemID]");
-        $subitemI = 0;
         // print_r("SUBITEMS OF $itemNameAndID[itemName]:\n");
         // print_r($subitemsNamesAndIDs);
         foreach($subitemsNamesAndIDs as $subitemNameAndID) {
 
-            //! Subitem table information corresponding to this loop iteration's subitem
             $subitemRow = "";
-            $subitemRowSpan = 0;
+            $subitemRowSpan = 0; // Number of allowed values the subitem has
 
-            if ($subitemI != 0) {$subitemRow.="<tr>";}
+            if ($subitemRowSpan != 0) {$subitemRow.="<tr>";} // First element continues in the same line, after that it's a new row               
 
             // Subitem ID
             $subitemRow.="<td rowspan=mistakxSubitemSpan> $subitemNameAndID[subitemID] </td>";
@@ -57,23 +56,20 @@ function allowed_values_table($databaseConnection) {
             // Subitem name
             $subitemRow.="<td rowspan=mistakxSubitemSpan> $subitemNameAndID[subitemName] </td>";
 
-            //* Query all associated allowed values and IDs
+            //! Query all associated allowed values and IDs
             $allowedValuesAndIDs = $databaseConnection->query("SELECT 
             subitem_allowed_value.id as allowedValueID, 
             subitem_allowed_value.value as allowedValue, 
             subitem_allowed_value.state as allowedValueState
             FROM subitem_allowed_value 
             WHERE subitem_allowed_value.subitem_id = $subitemNameAndID[subitemID]");
-            $allowedValueI = 0;
             // print_r("ALLOWED VALUES:\n");
             // print_r($allowedValuesAndIDs);
             foreach($allowedValuesAndIDs as $allowedValueAndID) {
-                $subitemRowSpan++;
 
-                //! Subitem table information corresponding to this loop iteration's subitem
                 $allowedValueRow = "";
 
-                if ($allowedValueI != 0) {$allowedValueRow.="<tr>";}                
+                if ($subitemRowSpan != 0) {$allowedValueRow.="<tr>";} // First element continues in the same line, after that it's a new row               
 
                 // Allowed value ID
                 $allowedValueRow.="<td> $allowedValueAndID[allowedValueID] </td>";
@@ -86,36 +82,30 @@ function allowed_values_table($databaseConnection) {
 
                 // Action
                 $allowedValueRow.="<td> Edit </td>";
-
-
-
-                if ($allowedValueI != 0) {$allowedValueRow.="</tr>";}
-                $subitemRow.=$allowedValueRow;
-                $allowedValueI++;
                 
+                if ($subitemRowSpan != 0) {$allowedValueRow.="</tr>";} // First element continues in the same line, after that it's a new row 
+                $subitemRow.=$allowedValueRow;
+                $subitemRowSpan++;
 
             }
 
-            print_r("</tr>");
-            if ($subitemI != 0) {$subitemRow.="</tr>";}
-            if ($subitemRowSpan == 0) { $subitemRowSpan++; }
+            if ($subitemRowSpan == 0) { // If subitem doesn't have any allowed values
+                $subitemRow.="<td colspan=4>Não há valores predefinidos (subitem)</td>"; // TODO: Make this more dynamic
+                $subitemRowSpan++; // The subitem row span can't be 0 because it bugs itself, so make it 1
+            }
+            if ($subitemRowSpan != 0) {$subitemRow.="</tr>";} // First element continues in the same line, after that it's a new row               
             $itemRowSpan = $itemRowSpan + $subitemRowSpan;
             $itemRow.= str_replace("mistakxSubitemSpan", strval($subitemRowSpan),$subitemRow);
-            $subitemRowSpan = 0;
-            $subitemRow = "";
-            $subitemI++;
 
         }
 
         
-        $itemRow.="</tr>";
-        // str_replace("mistakxItemSpan",$itemRowSpan,$itemRow);
-        // echo $itemRow;
-        if ($itemRowSpan == 0) { $itemRowSpan++; }
+        if ($itemRowSpan == 0) { // If item doesn't have any subitems
+            $itemRow.="<td colspan=6>Não há valores predefinidos (item)</td>"; // TODO: Make this more dynamic
+            $itemRowSpan++; // The item row span can't be 0 because it bugs itself, so make it 1
+        } 
+        $itemRow.="</tr>"; 
         echo str_replace("mistakxItemSpan", strval($itemRowSpan),$itemRow);
-        // print_r($itemRow);
-        $itemRowSpan = 0;
-        $itemRow = "";
 
     }
 
