@@ -7,6 +7,8 @@ function handle_request($databaseConnection) {
 
     if ( array_key_exists("Estado", $_REQUEST) and $_REQUEST['Estado'] == "Inserir") { //* User has inserted some unit type
 
+        echo "<h3>Gestão de unidades - inserção</h3>"; 
+
         $unitToInsert = $_REQUEST['Nome'];
 
         if ( $unitToInsert != "") { //* Non empty unit type name
@@ -21,27 +23,37 @@ function handle_request($databaseConnection) {
             }
             
             if ($unitNameAlreadyExists) {
-
-                echo "<script>alert('O valor $unitToInsert já existe na base de dados.')</script>";
+                echo "O valor $unitToInsert já existe na base de dados.\n";
+                echo "<a href=''>Voltar atrás.</a>";
 
             } else {
-
                 $databaseConnection->query("INSERT INTO subitem_unit_type (name) VALUES ('$unitToInsert')");
-                $alertText = "alert('Foi inserido o valor $unitToInsert.')";
-                // $alertText = "<script> if (window.confirm('If you click ok you would be redirected . Cancel will load this website ')) { window.location.href='https://www.google.com/chrome/browser/index.html'; };";
-                // $alertText = "window.postMessage('Foi inserido o valor $unitInserted.')";
-                // $alertText.= "<a href='gestao-de-unidades.php'>Continuar</a>";
-                echo "<script>$alertText</script>";
-
+                echo "Foi inserido o valor $unitToInsert.\n";
+                echo "<a href=''>Continuar.</a>";
             }
 
         } else { //* Empty unit type name
-            echo "<script>alert('O nome da unidade enviada foi inválido.')</script>";
-            // echo "<br><br>";
+            echo "O nome da unidade enviada foi inválido.\n";
+            echo "<a href=''>Voltar atrás.</a>";
         }
     
     } else { //* If the user entered the page as usual, without inserting any unit type
-        return;
+      
+        $subitemTypes = $databaseConnection->query("SELECT * FROM subitem_unit_type");
+        
+        if ($subitemTypes->num_rows == 0) { //* If there are no unit types in the database
+
+            echo "<strong> Não há tipos de unidades.</strong>";
+
+        } else { //* If there are unit types in the database
+            
+            unit_types_table($databaseConnection, $subitemTypes); 
+
+        }
+
+        echo "<h3>Gestão de unidades - introdução</h3>"; 
+        insert_unit_type_form();
+
     }
 
 }
@@ -95,8 +107,6 @@ function unit_types_table($databaseConnection) {
 
 function insert_unit_type_form() {
 
-    echo "<h3>Gestão de unidades - introdução</h3>"; 
-
     echo "<form method='post'>"; // Form beginning
         echo "<input type='text' name='Nome' placeholder='Unidade a inserir'>";
         echo "<input type='hidden' name='Estado' value='Inserir'>";
@@ -104,6 +114,8 @@ function insert_unit_type_form() {
     echo "</form>"; // Form ending
     
 }
+
+print_r($_REQUEST);
 
 //* Verify if the user is logged in, and if it has the manage_unit_types capability
 verifyLoginAndCapability("manage_unit_types");
@@ -117,20 +129,6 @@ echo "<br>";
 
 //* Database information
 $databaseConnection = connectToDatabase();
-$subitemTypes = $databaseConnection->query("SELECT * FROM subitem_unit_type");
-
 handle_request($databaseConnection);
-
-if ($subitemTypes->num_rows == 0) { //* If there are no unit types in the database
-     
-    echo "<strong> Não há tipos de unidades.</strong>";
-    
-} else { //* If there are unit types in the database
-
-    unit_types_table($databaseConnection, $subitemTypes);
-    insert_unit_type_form();
-
-}
-
 
 ?> 
