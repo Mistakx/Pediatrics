@@ -3,9 +3,27 @@
 
 require_once("custom/php/common.php");
 
-function allowed_values_table($databaseConnection) {
+function handle_request($databaseConnection) {
 
-    print_r("DEBUG13");
+    if ( array_key_exists("estado", $_REQUEST) and $_REQUEST['estado'] == "introducao") { //* User has inserted some unit type
+
+        $_REQUEST["subitem_id"] = $_REQUEST["subitem"];
+
+        allowed_values_form($_REQUEST["subitem_id"]);
+        // Apresentar o Sub-título (heading 3): Gestão de valores permitidos - introdução e logo depois um formulário que possibilita a inserção de um novo valor permitido:
+    
+        // text - Valor - (obrigatório)
+        // hidden (estado) - value: inserir
+        // submit - Inserir valor permitido
+    
+        
+    } else { //* If the user entered the page as usual
+        return;
+    }
+
+}
+
+function allowed_values_table($databaseConnection) {
 
     echo "<table>"; //* Table beginning
     
@@ -54,7 +72,7 @@ function allowed_values_table($databaseConnection) {
             $subitemRow.="<td rowspan=mistakxSubitemSpan> $subitemNameAndID[subitemID] </td>";
 
             // Subitem name
-            $subitemRow.="<td rowspan=mistakxSubitemSpan> $subitemNameAndID[subitemName] </td>";
+            $subitemRow.="<td rowspan=mistakxSubitemSpan> <a href='?estado=introducao&subitem=$subitemNameAndID[subitemID]'>$subitemNameAndID[subitemName]</a> </td>";
 
             //! Query all associated allowed values and IDs
             $allowedValuesAndIDs = $databaseConnection->query("SELECT 
@@ -78,10 +96,21 @@ function allowed_values_table($databaseConnection) {
                 $allowedValueRow.="<td> $allowedValueAndID[allowedValue] </td>";
         
                 // Allowed value state
-                $allowedValueRow.="<td> $allowedValueAndID[allowedValueState] </td>";
+                if ($allowedValueAndID["allowedValueState"] == "active") {
+                    $allowedValueRow.="<td> ativo </td>";
+                } else {
+                   $allowedValueRow.="<td> inativo </td>";
+                }
 
                 // Action
-                $allowedValueRow.="<td> Edit </td>";
+                $allowedValueRow.="<td>";
+                $allowedValueRow.="[editar]<br>";
+                if ($allowedValueAndID["allowedValueState"] == "active") {
+                    $allowedValueRow.="[desativar]";
+                } else {
+                    $allowedValueRow.="[ativar]";
+                }
+                $allowedValueRow.="</td>";
                 
                 if ($subitemRowSpan != 0) {$allowedValueRow.="</tr>";} // First element continues in the same line, after that it's a new row 
                 $subitemRow.=$allowedValueRow;
@@ -112,6 +141,18 @@ function allowed_values_table($databaseConnection) {
     echo "</table>"; // Table ending  
 }
 
+function allowed_values_form($subitemID) {
+    echo "<h3>Gestão de valores permitidos - introdução</h3>"; 
+
+    echo "<form method='post'>"; // Form beginning
+        echo "<input type='text' name='Valor' placeholder='Subitem ID: $subitemID' >";
+        echo "<input type='hidden' name='Estado' value='Inserir'>";
+        echo "<button> Submeter </button>";
+    echo "</form>"; // Form ending
+}
+
+
+print_r($_REQUEST);
 
 //* Verify if the user is logged in, and if it has the manage_unit_types capability
 verifyLoginAndCapability("manage_allowed_values");
@@ -127,6 +168,7 @@ echo "<br>";
 $databaseConnection = connectToDatabase();
 $items = $databaseConnection->query("SELECT * FROM item");
 
+
 if ($items->num_rows == 0) { //* If there are no subitems in the database
      
     echo "<strong> Não há subitens especificados.</strong>";
@@ -134,6 +176,8 @@ if ($items->num_rows == 0) { //* If there are no subitems in the database
 } else { //* If there are subitems in the database
 
     allowed_values_table($databaseConnection);
+    handle_request($databaseConnection);
+
 }
 
 

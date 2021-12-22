@@ -23,9 +23,15 @@ function handle_request($databaseConnection) {
                 echo "<script>alert('O valor $unitInserted já existe na base de dados.')</script>";
             } else {
                 $databaseConnection->query("INSERT INTO subitem_unit_type (name) VALUES ('$unitInserted')");
-                echo "<script>alert('Foi inserido o valor $unitInserted.')</script>";
+                $alertText = "alert('Foi inserido o valor $unitInserted.')";
+                // $alertText = "<script> if (window.confirm('If you click ok you would be redirected . Cancel will load this website ')) { window.location.href='https://www.google.com/chrome/browser/index.html'; };";
+                // $alertText = "window.postMessage('Foi inserido o valor $unitInserted.')";
+                // $alertText.= "<a href='gestao-de-unidades.php'>Continuar</a>";
+                echo "<script>$alertText</script>";
             }
 
+
+            
 
 
         } else { //* Invalid unit type name
@@ -88,10 +94,10 @@ function unit_types_table($databaseConnection) {
 
 function insert_unit_type_form() {
 
-    echo "<h3>Gestão de unidades - introdução</hr>"; 
+    echo "<h3>Gestão de unidades - introdução</h3>"; 
 
     echo "<form method='post'>"; // Form beginning
-        echo "<input type='text' name='Nome' >";
+        echo "<input type='text' name='Nome' placeholder='Unidade a inserir'>";
         echo "<input type='hidden' name='Estado' value='Inserir'>";
         echo "<button> Submeter </button>";
     echo "</form>"; // Form ending
