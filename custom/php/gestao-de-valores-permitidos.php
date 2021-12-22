@@ -5,20 +5,46 @@ require_once("custom/php/common.php");
 
 function handle_request($databaseConnection) {
 
-    if ( array_key_exists("estado", $_REQUEST) and $_REQUEST['estado'] == "introducao") { //* User has inserted some unit type
+    if ( array_key_exists("Estado", $_REQUEST) and $_REQUEST['Estado'] == "Introducao") { //* User has clicked a subitem
+      
+        $_REQUEST["Subitem_id"] = $_REQUEST["Subitem"];
+        $subitemID = $_REQUEST['Subitem_id']; 
+        return array(true, $subitemID); 
 
-        $_REQUEST["subitem_id"] = $_REQUEST["subitem"];
+    } else if ( array_key_exists("Estado", $_REQUEST) and $_REQUEST['Estado'] == "Inserir") { //* User has inserted some value
+       
+        $_REQUEST["Subitem_id"] = $_REQUEST["Subitem"];
+        $subitemID = $_REQUEST['Subitem_id']; 
+        $valueToInsert = $_REQUEST['Valor']; 
 
-        allowed_values_form($_REQUEST["subitem_id"]);
-        // Apresentar o Sub-título (heading 3): Gestão de valores permitidos - introdução e logo depois um formulário que possibilita a inserção de um novo valor permitido:
-    
-        // text - Valor - (obrigatório)
-        // hidden (estado) - value: inserir
-        // submit - Inserir valor permitido
-    
-        
+        if ( $valueToInsert != "" ) { //* Non empty value
+
+            $valuesInDatabase = $databaseConnection->query("SELECT value FROM subitem_allowed_value WHERE subitem_allowed_value.subitem_id = $subitemID");
+            $valueAlreadyExists = FALSE;
+            foreach ($valuesInDatabase as $valueInDatabase) { // Check if unit already exists in the database                
+                if ($valueToInsert == $valueInDatabase["value"]) {
+                    $valueAlreadyExists = TRUE;
+                    break;
+                }
+            }
+            
+            if ($valueAlreadyExists) {
+                echo "<script>alert('O valor $valueToInsert já existe na base de dados.')</script>";
+            } else {
+                $databaseConnection->query("INSERT INTO subitem_allowed_value (subitem_id, value) VALUES ('$subitemID', '$valueToInsert')");
+                $alertText = "alert('Foi inserido o valor $valueToInsert.')";
+                echo "<script>$alertText</script>)";
+
+            }
+
+        } else { //* Empty value
+
+            echo "<script>alert('O nome do valor permitido enviado foi inválido.')</script>";
+
+        }
+
     } else { //* If the user entered the page as usual
-        return;
+        return array(false, NULL);
     }
 
 }
@@ -72,7 +98,7 @@ function allowed_values_table($databaseConnection) {
             $subitemRow.="<td rowspan=mistakxSubitemSpan> $subitemNameAndID[subitemID] </td>";
 
             // Subitem name
-            $subitemRow.="<td rowspan=mistakxSubitemSpan> <a href='?estado=introducao&subitem=$subitemNameAndID[subitemID]'>$subitemNameAndID[subitemName]</a> </td>";
+            $subitemRow.="<td rowspan=mistakxSubitemSpan> <a href='?Estado=Introducao&Subitem=$subitemNameAndID[subitemID]'>$subitemNameAndID[subitemName]</a> </td>";
 
             //! Query all associated allowed values and IDs
             $allowedValuesAndIDs = $databaseConnection->query("SELECT 
@@ -151,7 +177,6 @@ function allowed_values_form($subitemID) {
     echo "</form>"; // Form ending
 }
 
-
 print_r($_REQUEST);
 
 //* Verify if the user is logged in, and if it has the manage_unit_types capability
@@ -174,10 +199,9 @@ if ($items->num_rows == 0) { //* If there are no subitems in the database
     echo "<strong> Não há subitens especificados.</strong>";
     
 } else { //* If there are subitems in the database
-
+    list($showForm, $subitemID) = handle_request($databaseConnection);
     allowed_values_table($databaseConnection);
-    handle_request($databaseConnection);
-
+    if ($showForm) { allowed_values_form($subitemID);}
 }
 
 
