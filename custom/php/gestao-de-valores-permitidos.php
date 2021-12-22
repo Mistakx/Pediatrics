@@ -43,6 +43,8 @@ function handle_request($databaseConnection) {
 
         }
 
+        return array(true, $subitemID); 
+
     } else { //* If the user entered the page as usual
         return array(false, NULL);
     }
