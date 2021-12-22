@@ -9,7 +9,9 @@ function handle_request($databaseConnection) {
       
         $_REQUEST["Subitem_id"] = $_REQUEST["Subitem"];
         $subitemID = $_REQUEST['Subitem_id']; 
-        return array(true, $subitemID); 
+        allowed_values_table($databaseConnection);
+        allowed_values_form($subitemID);
+        echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
 
     } else if ( array_key_exists("Estado", $_REQUEST) and $_REQUEST['Estado'] == "Inserir") { //* User has inserted some value
        
@@ -19,34 +21,46 @@ function handle_request($databaseConnection) {
 
         if ( $valueToInsert != "" ) { //* Non empty value
 
-            $valuesInDatabase = $databaseConnection->query("SELECT value FROM subitem_allowed_value WHERE subitem_allowed_value.subitem_id = $subitemID");
+            $values = $databaseConnection->query("SELECT value FROM subitem_allowed_value WHERE subitem_allowed_value.subitem_id = $subitemID");
             $valueAlreadyExists = FALSE;
-            foreach ($valuesInDatabase as $valueInDatabase) { // Check if unit already exists in the database                
-                if ($valueToInsert == $valueInDatabase["value"]) {
+            foreach ($values as $value) { // Check if unit already exists in the database                
+                if ($valueToInsert == $value["value"]) {
                     $valueAlreadyExists = TRUE;
                     break;
                 }
             }
             
             if ($valueAlreadyExists) {
-                echo "<script>alert('O valor $valueToInsert já existe na base de dados.')</script>";
-            } else {
-                $databaseConnection->query("INSERT INTO subitem_allowed_value (subitem_id, value) VALUES ('$subitemID', '$valueToInsert')");
-                $alertText = "alert('Foi inserido o valor $valueToInsert.')";
-                echo "<script>$alertText</script>)";
 
+                echo "O valor $valueToInsert já existe na base de dados.\n";
+                echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
+
+            } else {
+
+                $databaseConnection->query("INSERT INTO subitem_allowed_value (subitem_id, value) VALUES ('$subitemID', '$valueToInsert')");
+                echo "Foi inserido o valor $valueToInsert.\n";
+                echo "<a href=''>Continuar.</a>";
+            
             }
 
         } else { //* Empty value
 
-            echo "<script>alert('O nome do valor permitido enviado foi inválido.')</script>";
+            echo "O nome do valor permitido enviado foi inválido.\n";
+            echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
 
         }
 
-        return array(true, $subitemID); 
-
     } else { //* If the user entered the page as usual
-        return array(false, NULL);
+
+        $items = $databaseConnection->query("SELECT id FROM item");
+
+        if ($items->num_rows == 0) { //* If there are no items in the database
+
+            echo "<strong> Não há subitens especificados.</strong>";
+
+        } else {
+            allowed_values_table($databaseConnection);
+        }
     }
 
 }
@@ -67,11 +81,8 @@ function allowed_values_table($databaseConnection) {
     </tr>";
 
     //! Query all item names and IDs
-    $itemsNamesAndIDs = $databaseConnection->query("SELECT 
-    item.name as itemName, 
-    item.id as itemID
-    FROM item");
-    foreach ($itemsNamesAndIDs as $itemNameAndID) {
+    $items = $databaseConnection->query("SELECT name, id FROM item");
+    foreach ($items as $item) {
         
         $itemRowSpan = 0;
         $itemRow = "";
@@ -79,17 +90,11 @@ function allowed_values_table($databaseConnection) {
         $itemRow.="<tr>";
 
         // Item name
-        $itemRow.="<td rowspan=mistakxItemSpan> $itemNameAndID[itemName] </td>";
+        $itemRow.="<td rowspan=mistakxItemSpan> $item[name] </td>";
 
         //! Query all associated subitem names and IDs
-        $subitemsNamesAndIDs = $databaseConnection->query("SELECT 
-        subitem.name as subitemName,
-        subitem.id as subitemID
-        FROM subitem
-        WHERE subitem.item_id = $itemNameAndID[itemID]");
-        // print_r("SUBITEMS OF $itemNameAndID[itemName]:\n");
-        // print_r($subitemsNamesAndIDs);
-        foreach($subitemsNamesAndIDs as $subitemNameAndID) {
+        $subitems = $databaseConnection->query("SELECT name, id FROM subitem WHERE subitem.item_id = $item[id]");
+        foreach($subitems as $subitem) {
 
             $subitemRow = "";
             $subitemRowSpan = 0; // Number of allowed values the subitem has
@@ -97,34 +102,29 @@ function allowed_values_table($databaseConnection) {
             if ($subitemRowSpan != 0) {$subitemRow.="<tr>";} // First element continues in the same line, after that it's a new row               
 
             // Subitem ID
-            $subitemRow.="<td rowspan=mistakxSubitemSpan> $subitemNameAndID[subitemID] </td>";
+            $subitemRow.="<td rowspan=mistakxSubitemSpan> $subitem[id] </td>";
 
             // Subitem name
-            $subitemRow.="<td rowspan=mistakxSubitemSpan> <a href='?Estado=Introducao&Subitem=$subitemNameAndID[subitemID]'>$subitemNameAndID[subitemName]</a> </td>";
+            $subitemRow.="<td rowspan=mistakxSubitemSpan> <a href='?Estado=Introducao&Subitem=$subitem[id]'>$subitem[name]</a> </td>";
 
             //! Query all associated allowed values and IDs
-            $allowedValuesAndIDs = $databaseConnection->query("SELECT 
-            subitem_allowed_value.id as allowedValueID, 
-            subitem_allowed_value.value as allowedValue, 
-            subitem_allowed_value.state as allowedValueState
-            FROM subitem_allowed_value 
-            WHERE subitem_allowed_value.subitem_id = $subitemNameAndID[subitemID]");
+            $allowedValues = $databaseConnection->query("SELECT id, value, state FROM subitem_allowed_value WHERE subitem_allowed_value.subitem_id = $subitem[id]");
             // print_r("ALLOWED VALUES:\n");
-            // print_r($allowedValuesAndIDs);
-            foreach($allowedValuesAndIDs as $allowedValueAndID) {
+            // print_r($allowedValues);
+            foreach($allowedValues as $allowedValue) {
 
                 $allowedValueRow = "";
 
                 if ($subitemRowSpan != 0) {$allowedValueRow.="<tr>";} // First element continues in the same line, after that it's a new row               
 
                 // Allowed value ID
-                $allowedValueRow.="<td> $allowedValueAndID[allowedValueID] </td>";
+                $allowedValueRow.="<td> $allowedValue[id] </td>";
 
                 // Allowed value
-                $allowedValueRow.="<td> $allowedValueAndID[allowedValue] </td>";
+                $allowedValueRow.="<td> $allowedValue[value] </td>";
         
                 // Allowed value state
-                if ($allowedValueAndID["allowedValueState"] == "active") {
+                if ($allowedValue["state"] == "active") {
                     $allowedValueRow.="<td> ativo </td>";
                 } else {
                    $allowedValueRow.="<td> inativo </td>";
@@ -133,7 +133,7 @@ function allowed_values_table($databaseConnection) {
                 // Action
                 $allowedValueRow.="<td>";
                 $allowedValueRow.="[editar]<br>";
-                if ($allowedValueAndID["allowedValueState"] == "active") {
+                if ($allowedValue["state"] == "active") {
                     $allowedValueRow.="[desativar]";
                 } else {
                     $allowedValueRow.="[ativar]";
@@ -193,18 +193,5 @@ echo "<br>";
 
 //* Database information
 $databaseConnection = connectToDatabase();
-$items = $databaseConnection->query("SELECT * FROM item");
-
-
-if ($items->num_rows == 0) { //* If there are no subitems in the database
-     
-    echo "<strong> Não há subitens especificados.</strong>";
-    
-} else { //* If there are subitems in the database
-    list($showForm, $subitemID) = handle_request($databaseConnection);
-    allowed_values_table($databaseConnection);
-    if ($showForm) { allowed_values_form($subitemID);}
-}
-
-
+handle_request($databaseConnection);
 ?> 
