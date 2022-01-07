@@ -13,21 +13,24 @@ function handle_request($databaseConnection) {
             echo "<h3>Edição de dados: Gestão de valores permitidos</h3>"; 
 
             $allowedValueToEditID = $_REQUEST["ID"];
-            $allowedValueToEdit = $databaseConnection->query("SELECT value FROM subitem_allowed_value WHERE subitem_allowed_value.subitem_id = allowedValueToEditID");
-            edit_value_form($valueToEditID, $allowedValueToEdit);
+            $allowedValueToEditQuery = $databaseConnection->query("SELECT value FROM subitem_allowed_value WHERE subitem_allowed_value.id = $allowedValueToEditID");
+            $allowedValueToEdit = mysqli_fetch_assoc($allowedValueToEditQuery)["value"];
+            edit_value_form($allowedValueToEditID, $allowedValueToEdit);
 
         }
 
 
     }
   
+    echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
+
 
 }
 
-function edit_value_form($valueToEditID, $allowedValueToEdit) {
+function edit_value_form($allowedValueToEditID, $allowedValueToEdit) {
 
     echo "<form method='post'>"; // Form beginning
-        echo "<input type='text' name='Valor' placeholder='Value: $allowedValueToEdit' >";
+        echo "<input type='text' name='Valor' placeholder='Valor permitido: $allowedValueToEdit' >";
         echo "<input type='hidden' name='Estado' value='Inserir'>";
         echo "<button> Submeter </button>";
     echo "</form>"; // Form ending
