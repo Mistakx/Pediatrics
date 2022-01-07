@@ -2,6 +2,7 @@
 // kU3o7LHl8HKq
 
 require_once("custom/php/common.php");
+wp_enqueue_style('ag', get_bloginfo( 'wpurl' ) . '/custom/css/ag.css',false,'1.1','all');
 
 function handle_request($databaseConnection) {
 
@@ -19,6 +20,7 @@ function handle_request($databaseConnection) {
         $subitemID = $_REQUEST['Subitem_id']; 
         $valueToInsert = $_REQUEST['Valor']; 
 
+        // TODO: Validations
         if ( $valueToInsert != "" ) { //* Non empty value
 
             $values = $databaseConnection->query("SELECT value FROM subitem_allowed_value WHERE subitem_allowed_value.subitem_id = $subitemID");
@@ -49,6 +51,7 @@ function handle_request($databaseConnection) {
             echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
 
         }
+        // Only numbers
 
     } else { //* If the user entered the page as usual
 
@@ -132,7 +135,8 @@ function allowed_values_table($databaseConnection) {
 
                 // Action
                 $allowedValueRow.="<td>";
-                $allowedValueRow.="[editar]<br>";
+                $editPageLink = get_bloginfo( 'wpurl' ) . "/edicao-de-dados" . "?Estado=Editar&Tipo=gestao-de-valores-permitidos&ID=$allowedValue[id]'";
+                $allowedValueRow.="<a href='" . $editPageLink . ">[editar]</a> <br>";
                 if ($allowedValue["state"] == "active") {
                     $allowedValueRow.="[desativar]";
                 } else {
@@ -179,7 +183,7 @@ function allowed_values_form($subitemID) {
     echo "</form>"; // Form ending
 }
 
-print_r($_REQUEST);
+// print_r($_REQUEST);
 
 //* Verify if the user is logged in, and if it has the manage_unit_types capability
 verifyLoginAndCapability("manage_allowed_values");

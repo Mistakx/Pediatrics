@@ -1,1 +1,23 @@
+body {
+    /* background-color: darkslategrey; */
+    color: white
+}
 
+div.site-content-header {
+    background-color: rgb(168, 162, 162) !important; 
+
+}
+
+article {
+    background-color: rgb(168, 162, 162) !important; 
+}
+
+
+button {
+    border-radius: 10px;
+    background-color: darkslategray;
+}
+
+span {
+    color: white
+}

@@ -2,15 +2,17 @@
 // kU3o7LHl8HKq
 
 require_once("custom/php/common.php");
+wp_enqueue_style('ag', get_bloginfo( 'wpurl' ) . '/custom/css/ag.css',false,'1.1','all');
 
 function handle_request($databaseConnection) {
 
     if ( array_key_exists("Estado", $_REQUEST) and $_REQUEST['Estado'] == "Inserir") { //* User has inserted some unit type
 
-        echo "<h3>Gestão de unidades - inserção</h3>"; 
+        echo "<h3>Gestão de unidades - inserção</h3>";
 
         $unitToInsert = $_REQUEST['Nome'];
-
+        
+        // TODO: Validations
         if ( $unitToInsert != "") { //* Non empty unit type name
 
             $subitemUnitNames = $databaseConnection->query("SELECT name FROM subitem_unit_type");
@@ -36,7 +38,8 @@ function handle_request($databaseConnection) {
             echo "O nome da unidade enviada foi inválido.\n";
             echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
         }
-    
+        // Only numbers
+        
     } else { //* If the user entered the page as usual, without inserting any unit type
       
         $subitemUnitIDs = $databaseConnection->query("SELECT id FROM subitem_unit_type");
@@ -113,7 +116,7 @@ function insert_unit_type_form() {
     
 }
 
-print_r($_REQUEST);
+// print_r($_REQUEST);
 
 //* Verify if the user is logged in, and if it has the manage_unit_types capability
 verifyLoginAndCapability("manage_unit_types");
