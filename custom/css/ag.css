@@ -1,23 +1,87 @@
+
+
+/*! Page color */
 body {
-    /* background-color: darkslategrey; */
-    color: white
+    background-color: rgb(102, 102, 102) !important; 
+    color: white;
 }
 
-div.site-content-header {
-    background-color: rgb(168, 162, 162) !important; 
-
+body::after {
+    content: "";
+    background-image: url("kisspng-the-witcher-3-wild-hunt-geralt-of-rivia-the-witch-witcher-news-5b8aebcfa91573.7170111715358309916926.png");
+    background-repeat: no-repeat;
+    background-position: center 100px;
+    background-size: 50%;
+    opacity: 0.5;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0; 
+    position: absolute;
+    z-index: -1;   
 }
 
+/*! Wordpress header bar*/
+.site-header {
+    background-color: rgb(141, 141, 141) !important; 
+}
+
+/*! Wordpress header buttons */
+.main-navigation .menu > li > a {
+    background-color: rgb(141, 141, 141) !important; 
+    /* color:white !important */
+}
+
+
+/*! Article header  */
+div.site-content-header { 
+    background-color: rgb(46, 46, 46) !important; 
+}
+
+/*! Article */
 article {
-    background-color: rgb(168, 162, 162) !important; 
+    background-color: rgb(46, 46, 46) !important; 
 }
 
+/*! Article content headers */
+h1, h3 {
+    color: white;
+}
 
+/*! Buttons */
 button {
+    margin-left: 10px;
     border-radius: 10px;
     background-color: darkslategray;
 }
 
+
+/*! Form buttons */
+input[type=reset]:hover {
+	background-color: #10659C;
+}
+
+input[type=reset] {
+    border: 0px;
+    cursor: pointer;
+    font-weight: 700;
+    margin-left: 10px;
+    border-radius: 10px;
+    background-color: darkslategray;
+    color: #ffffff;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px;
+}
+
+/*! Edit button at end of page */
 span {
     color: white
 }
+
+
+/*! Form input bar */
+input {
+    width: auto;
+}
+
