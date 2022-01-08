@@ -77,7 +77,6 @@ function unit_types_table($databaseConnection) {
     //* For each subitem unit type
     foreach($subitemUnits as $subitemUnit) {
 
-
         echo "<tr>"; // Begin table row
 
         echo "<td>" . $subitemUnit["id"] . "</td>"; //* First column
@@ -109,8 +108,9 @@ function unit_types_table($databaseConnection) {
 function insert_unit_type_form() {
 
     echo "<form method='post'>"; // Form beginning
-        echo "<input type='text' name='Nome' placeholder='Unidade a inserir'>";
+        echo "<input type='text' name='Nome' placeholder='Nova unidade'>";
         echo "<input type='hidden' name='Estado' value='Inserir'>";
+        echo "<input type='reset' value='Limpar'></input>"; //* Clear form button
         echo "<button> Submeter </button>";
     echo "</form>"; // Form ending
     

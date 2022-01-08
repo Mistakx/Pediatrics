@@ -1,4 +1,5 @@
 <?php
+
 require_once("custom/php/common.php");
 
 function connectToDatabase() {
@@ -7,7 +8,7 @@ function connectToDatabase() {
     $connectionError = mysqli_error($databaseConnection);
 
     if (!$databaseConnection) {
-        echo "Erro na ligação: $connectionError.";
+        echo "Erro de comunicação: $connectionError.";
         exit();
     }
 
@@ -18,23 +19,24 @@ function connectToDatabase() {
 function verifyLoginAndCapability($capabilityName) {
     
     if (!(is_user_logged_in())) {
-        exit("User isn't logged in.\n");
-    } else {
-        echo "User is logged in.\n";
-    }
+        exit("O utilizador não está autenticado.\n");
+    } 
+    
+    echo "O utilizador está autenticado.\n";
     
     if (!(current_user_can($capabilityName))) {
-        echo "User can't $capabilityName.\n";
-        exit("User doesn't have the permissions to view this page.\n");
-    } else {
-        echo "User can $capabilityName.\n";
-    }
+        echo "O utilizador não tem a capability $capabilityName.\n";
+        exit("Não tem autorização para aceder a esta página.\n");
+    } 
+
+    echo "O utilizador pode $capabilityName.\n";
+    
 
 
 }
 
 function printCurrentUserRoles($currentUser){
-    echo "Roles: ";
+    echo "Role do utilizador: ";
     if ( !empty( $currentUser->roles ) && is_array( $currentUser->roles ) ) {
         foreach ( $currentUser->roles as $role )
             echo $role, " ";
@@ -45,7 +47,7 @@ function printCurrentUserRoles($currentUser){
 
 function printCurrentUsername($currentUser){
     $currentUserUsername = $currentUser->user_login;
-    echo "Username: $currentUserUsername\n";
+    echo "Nome do utilizador: $currentUserUsername\n";
 }
 
 ?> 

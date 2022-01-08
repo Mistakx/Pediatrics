@@ -6,54 +6,64 @@ wp_enqueue_style('ag', get_bloginfo( 'wpurl' ) . '/custom/css/ag.css',false,'1.1
 
 function handle_request($databaseConnection) {
 
-    if ( array_key_exists("Estado", $_REQUEST) and $_REQUEST['Estado'] == "Introducao") { //* User has clicked a subitem
+    if (array_key_exists("Estado", $_REQUEST))  {
+
+        if ($_REQUEST['Estado'] == "Introducao") { //* User has clicked a subitem
       
-        $_REQUEST["Subitem_id"] = $_REQUEST["Subitem"];
-        $subitemID = $_REQUEST['Subitem_id']; 
-        allowed_values_table($databaseConnection);
-        allowed_values_form($subitemID);
-        echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
-
-    } else if ( array_key_exists("Estado", $_REQUEST) and $_REQUEST['Estado'] == "Inserir") { //* User has inserted some value
-       
-        $_REQUEST["Subitem_id"] = $_REQUEST["Subitem"];
-        $subitemID = $_REQUEST['Subitem_id']; 
-        $valueToInsert = $_REQUEST['Valor']; 
-
-        // TODO: Validations
-        if ( $valueToInsert != "" ) { //* Non empty value
-
-            $values = $databaseConnection->query("SELECT value FROM subitem_allowed_value WHERE subitem_allowed_value.subitem_id = $subitemID");
-            $valueAlreadyExists = FALSE;
-            foreach ($values as $value) { // Check if unit already exists in the database                
-                if ($valueToInsert == $value["value"]) {
-                    $valueAlreadyExists = TRUE;
-                    break;
-                }
-            }
-            
-            if ($valueAlreadyExists) {
-
-                echo "O valor $valueToInsert já existe na base de dados.\n";
-                echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
-
-            } else {
-
-                $databaseConnection->query("INSERT INTO subitem_allowed_value (subitem_id, value) VALUES ('$subitemID', '$valueToInsert')");
-                echo "Foi inserido o valor $valueToInsert.\n";
-                echo "<a href=''>Continuar.</a>";
-            
-            }
-
-        } else { //* Empty value
-
-            echo "O nome do valor permitido enviado foi inválido.\n";
+            $_REQUEST["Subitem_id"] = $_REQUEST["Subitem"]; //TODO: Does the teacher think this is necessary?
+            $subitemID = $_REQUEST['Subitem_id']; 
+            allowed_values_table($databaseConnection);
+            $subitemNameQuery = $databaseConnection->query("SELECT name FROM subitem WHERE subitem.id = $subitemID");
+            $subitemName = mysqli_fetch_assoc($subitemNameQuery)["name"];
+            allowed_values_form($subitemID, $subitemName);
             echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
-
+    
+        } 
+        
+        else if ($_REQUEST['Estado'] == "Inserir") { //* User has inserted some value
+           
+            $_REQUEST["Subitem_id"] = $_REQUEST["Subitem"];
+            $subitemID = $_REQUEST['Subitem_id']; 
+            $valueToInsert = $_REQUEST['Valor']; 
+    
+            // TODO: Validations
+            if ( $valueToInsert != "" ) { //* Non empty value
+    
+                $values = $databaseConnection->query("SELECT value FROM subitem_allowed_value WHERE subitem_allowed_value.subitem_id = $subitemID");
+                $valueAlreadyExists = FALSE;
+                foreach ($values as $value) { // Check if unit already exists in the database                
+                    if ($valueToInsert == $value["value"]) {
+                        $valueAlreadyExists = TRUE;
+                        break;
+                    }
+                }
+                
+                if ($valueAlreadyExists) {
+    
+                    echo "O valor $valueToInsert já existe na base de dados.\n";
+                    echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
+    
+                } else {
+    
+                    $databaseConnection->query("INSERT INTO subitem_allowed_value (subitem_id, value) VALUES ('$subitemID', '$valueToInsert')");
+                    echo "Foi inserido o valor $valueToInsert.\n";
+                    echo "<a href=''>Continuar.</a>";
+                
+                }
+    
+            } else { //* Empty value
+    
+                echo "O nome do valor permitido enviado foi inválido.\n";
+                echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
+    
+            }
+            // Only numbers
+    
         }
-        // Only numbers
 
-    } else { //* If the user entered the page as usual
+    }
+
+ else { //* If the user entered the page as usual
 
         $items = $databaseConnection->query("SELECT id FROM item");
 
@@ -138,9 +148,11 @@ function allowed_values_table($databaseConnection) {
                 $editPageLink = get_bloginfo( 'wpurl' ) . "/edicao-de-dados" . "?Estado=Editar&Tipo=gestao-de-valores-permitidos&ID=$allowedValue[id]'";
                 $allowedValueRow.="<a href='" . $editPageLink . ">[editar]</a> <br>";
                 if ($allowedValue["state"] == "active") {
-                    $allowedValueRow.="[desativar]";
+                    $deactivatePageLink = get_bloginfo( 'wpurl' ) . "/edicao-de-dados" . "?Estado=Desativar&Tipo=gestao-de-valores-permitidos&ID=$allowedValue[id]'";
+                    $allowedValueRow.="<a href='" . $deactivatePageLink . ">[desativar]</a> <br>";
                 } else {
-                    $allowedValueRow.="[ativar]";
+                    $activatePageLink = get_bloginfo( 'wpurl' ) . "/edicao-de-dados" . "?Estado=Ativar&Tipo=gestao-de-valores-permitidos&ID=$allowedValue[id]'";
+                    $allowedValueRow.="<a href='" . $activatePageLink . ">[ativar]</a> <br>";
                 }
                 $allowedValueRow.="</td>";
                 
@@ -173,14 +185,16 @@ function allowed_values_table($databaseConnection) {
     echo "</table>"; // Table ending  
 }
 
-function allowed_values_form($subitemID) {
+function allowed_values_form($subitemID, $subitemName) {
     echo "<h3>Gestão de valores permitidos - introdução</h3>"; 
 
     echo "<form method='post'>"; // Form beginning
-        echo "<input type='text' name='Valor' placeholder='Subitem ID: $subitemID' >";
+        echo "<input type='text' name='Valor' placeholder='Valor permitido ($subitemName)' >";
         echo "<input type='hidden' name='Estado' value='Inserir'>";
+        echo "<input type='reset' value='Limpar'></input>"; //* Clear form button
         echo "<button> Submeter </button>";
     echo "</form>"; // Form ending
+
 }
 
 // print_r($_REQUEST);
