@@ -26,38 +26,14 @@ function handle_request($databaseConnection) {
             $subitemID = $_REQUEST['Subitem_id']; 
             $valueToInsert = $_REQUEST['Valor']; 
     
-            // TODO: Validations
-            if ( $valueToInsert != "" ) { //* Non empty value
-    
-                $values = $databaseConnection->query("SELECT value FROM subitem_allowed_value WHERE subitem_allowed_value.subitem_id = $subitemID");
-                $valueAlreadyExists = FALSE;
-                foreach ($values as $value) { // Check if unit already exists in the database                
-                    if ($valueToInsert == $value["value"]) {
-                        $valueAlreadyExists = TRUE;
-                        break;
-                    }
-                }
-                
-                if ($valueAlreadyExists) {
-    
-                    echo "O valor $valueToInsert já existe na base de dados.\n";
-                    echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
-    
-                } else {
-    
-                    $databaseConnection->query("INSERT INTO subitem_allowed_value (subitem_id, value) VALUES ('$subitemID', '$valueToInsert')");
-                    echo "Foi inserido o valor $valueToInsert.\n";
-                    echo "<a href=''>Continuar.</a>";
-                
-                }
-    
-            } else { //* Empty value
-    
-                echo "O nome do valor permitido enviado foi inválido.\n";
-                echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
-    
-            }
-            // Only numbers
+            //! Validations
+            $valuesInDatabase = $databaseConnection->query("SELECT value FROM subitem_allowed_value WHERE subitem_allowed_value.subitem_id = $subitemID");
+            $valueIsValid = !validateNewElementByName($valueToInsert, "value", $valuesInDatabase);
+            if ($valueIsValid) {
+                $databaseConnection->query("INSERT INTO subitem_allowed_value (subitem_id, value) VALUES ('$subitemID', '$valueToInsert')");
+                echo "Foi inserido o valor permitido $valueToInsert.\n";
+                echo "<a href=''>Continuar.</a>";
+            }    
     
         }
 
@@ -145,14 +121,14 @@ function allowed_values_table($databaseConnection) {
 
                 // Action
                 $allowedValueRow.="<td>";
-                $editPageLink = get_bloginfo( 'wpurl' ) . "/edicao-de-dados" . "?Estado=Editar&Tipo=gestao-de-valores-permitidos&ID=$allowedValue[id]'";
-                $allowedValueRow.="<a href='" . $editPageLink . ">[editar]</a> <br>";
+                $editPageLink = get_bloginfo( 'wpurl' ) . "/edicao-de-dados" . "?Estado=Editar&Tipo=gestao-de-valores-permitidos&ID=$allowedValue[id]";
+                $allowedValueRow.="<a href=" . $editPageLink . ">[editar]</a> <br>";
                 if ($allowedValue["state"] == "active") {
-                    $deactivatePageLink = get_bloginfo( 'wpurl' ) . "/edicao-de-dados" . "?Estado=Desativar&Tipo=gestao-de-valores-permitidos&ID=$allowedValue[id]'";
-                    $allowedValueRow.="<a href='" . $deactivatePageLink . ">[desativar]</a> <br>";
+                    $deactivatePageLink = get_bloginfo( 'wpurl' ) . "/edicao-de-dados" . "?Estado=Desativar&Tipo=gestao-de-valores-permitidos&ID=$allowedValue[id]";
+                    $allowedValueRow.="<a href=" . $deactivatePageLink . ">[desativar]</a> <br>";
                 } else {
-                    $activatePageLink = get_bloginfo( 'wpurl' ) . "/edicao-de-dados" . "?Estado=Ativar&Tipo=gestao-de-valores-permitidos&ID=$allowedValue[id]'";
-                    $allowedValueRow.="<a href='" . $activatePageLink . ">[ativar]</a> <br>";
+                    $activatePageLink = get_bloginfo( 'wpurl' ) . "/edicao-de-dados" . "?Estado=Ativar&Tipo=gestao-de-valores-permitidos&ID=$allowedValue[id]";
+                    $allowedValueRow.="<a href=" . $activatePageLink . ">[ativar]</a> <br>";
                 }
                 $allowedValueRow.="</td>";
                 

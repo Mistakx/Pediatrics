@@ -11,18 +11,25 @@ function handle_request($databaseConnection) {
         
         if ($_REQUEST['Estado'] == "Atualizar") { //* User edited some tuple
 
-            // TODO: Input validation: Empty form
-
             if ($_REQUEST['Tipo'] == "gestao-de-valores-permitidos") { //* User edited allowed value
 
                 $allowedValueToEditID = $_REQUEST["ID"];
+                $subitemThatHasAllowedValueIDQuery = $databaseConnection->query("SELECT subitem_id FROM subitem_allowed_value WHERE subitem_allowed_value.id = $allowedValueToEditID "); // This is used because when editing an allowed value, we need to check if the new name already exists in the corresponding subitem.
+                $subitemThatHasAllowedValueID = mysqli_fetch_assoc($subitemThatHasAllowedValueIDQuery)["subitem_id"];
                 $newValue = $_REQUEST["Valor"];
-                $databaseConnection->query("UPDATE subitem_allowed_value SET value = '$newValue' WHERE subitem_allowed_value.id = $allowedValueToEditID");
+
+                //! Validations
+                $valuesInDatabase = $databaseConnection->query("SELECT value FROM subitem_allowed_value WHERE subitem_allowed_value.subitem_id = $subitemThatHasAllowedValueID");
+                $valueIsValid = !validateNewElementByName($newValue, "value", $valuesInDatabase);
+                if ($valueIsValid) {
+                    $databaseConnection->query("UPDATE subitem_allowed_value SET value = '$newValue' WHERE subitem_allowed_value.id = $allowedValueToEditID");
+                    echo "Valor atualizado com sucesso.\n";
+                    echo "<a href=". get_bloginfo( 'wpurl' ) . "/gestao-de-valores-permitidos>Confirmar.</a>\n"; 
+                }  
 
             }
 
-            echo "Valor atualizado com sucesso.\n";
-            echo "<a href=". get_bloginfo( 'wpurl' ) . "/gestao-de-valores-permitidos>Confirmar.</a>\n"; 
+
 
         }
 

@@ -12,33 +12,14 @@ function handle_request($databaseConnection) {
 
         $unitToInsert = $_REQUEST['Nome'];
         
-        // TODO: Validations
-        if ( $unitToInsert != "") { //* Non empty unit type name
-
-            $subitemUnitNames = $databaseConnection->query("SELECT name FROM subitem_unit_type");
-            $unitNameAlreadyExists = FALSE;
-            foreach ($subitemUnitNames as $subitemUnitName) { // Check if unit already exists in the database                
-                if ($unitToInsert == $subitemUnitName["name"]) {
-                    $unitNameAlreadyExists = TRUE;
-                    break;
-                }
-            }
-            
-            if ($unitNameAlreadyExists) {
-                echo "O valor $unitToInsert já existe na base de dados.\n";
-                echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
-
-            } else {
+            //! Validations
+            $unitNamesInDatabase = $databaseConnection->query("SELECT name FROM subitem_unit_type");
+            $unitNameIsValid = !validateNewElementByName($unitToInsert, "name", $unitNamesInDatabase);
+            if ($unitNameIsValid) {
                 $databaseConnection->query("INSERT INTO subitem_unit_type (name) VALUES ('$unitToInsert')");
-                echo "Foi inserido o valor $unitToInsert.\n";
+                echo "Foi inserida a unidade $unitToInsert.\n";
                 echo "<a href=''>Continuar.</a>";
-            }
-
-        } else { //* Empty unit type name
-            echo "O nome da unidade enviada foi inválido.\n";
-            echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
-        }
-        // Only numbers
+            }    
         
     } else { //* If the user entered the page as usual, without inserting any unit type
       
