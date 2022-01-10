@@ -1,5 +1,6 @@
 <?php 
-// kU3o7LHl8HKq
+
+//! Author: Sérgio Oliveira
 
 require_once("custom/php/common.php");
 wp_enqueue_style('ag', get_bloginfo( 'wpurl' ) . '/custom/css/ag.css',false,'1.1','all');

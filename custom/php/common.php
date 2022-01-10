@@ -1,6 +1,10 @@
 <?php
 
+// kU3o7LHl8HKq
+
 require_once("custom/php/common.php");
+
+//! Sérgio
 
 function connectToDatabase() {
     
@@ -50,7 +54,7 @@ function printCurrentUsername($currentUser){
     echo "Nome do utilizador: $currentUserUsername\n";
 }
 
-//! Validates if the new tuple name being inserted is valid
+//* Validates if the new tuple name being inserted is valid
 function validateNewElementByName($tupleName, $tupleNameDatabaseParameter, $databaseTuples) {
     
     if ( $tupleName != "" ) { //* Non empty value
@@ -95,4 +99,26 @@ function validateNewElementByName($tupleName, $tupleNameDatabaseParameter, $data
     }
     
 }
+
+//! Filipa
+
+function BackButton(){
+    echo "<script type='text/javascript'>document.write(\"<a href='javascript:history.back()' class='backLink' title='Voltar atr&aacute;s'>Voltar atr&aacute;s</a>\");</script>
+<noscript>
+<a href='".$_SERVER['HTTP_REFERER']."‘ class='backLink' title='Voltar atr&aacute;s'>Voltar atr&aacute;s</a>
+</noscript>";
+}
+
+function validateInputs($error){
+    if (!empty($error)) {
+        foreach ($error as $value) {
+            echo "$value !<br>";
+        }
+        BackButton();
+    }
+    else{
+        return true;
+    }
+}
+
 ?> 
