@@ -166,7 +166,7 @@ function allowed_values_form($subitemID, $subitemName) {
     echo "<h3>Gestão de valores permitidos - introdução</h3>"; 
 
     echo "<form method='post'>"; // Form beginning
-        echo "<input type='text' name='Valor' placeholder='Valor permitido ($subitemName)' >";
+        echo "<input type='text' name='Valor' placeholder='Valor permitido ($subitemName)' pattern='[^0-9]+|(.|\s)*\S(.|\s)*'>";
         echo "<input type='hidden' name='Estado' value='Inserir'>";
         echo "<input type='reset' value='Limpar'></input>"; //* Clear form button
         echo "<button> Submeter </button>";

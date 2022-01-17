@@ -141,7 +141,7 @@ function edit_allowed_value_form($allowedValueToEditID, $allowedValueToEditName)
     echo "<div class='form-inline'>";
     
     echo "<form method='post'>"; // Form beginning
-        echo "<input id='Valor' type='text' name='Valor' placeholder='Valor permitido: $allowedValueToEditName' >";
+        echo "<input id='Valor' type='text' name='Valor' placeholder='Valor permitido: $allowedValueToEditName' pattern='[^0-9]+|(.|\s)*\S(.|\s)*''>";
         echo "<input type='hidden' name='Estado' value='Atualizar'>";
         echo "<input type='hidden' name='Tipo' value=$_REQUEST[Tipo]>";
         echo "<input type='hidden' name='ID' value=$allowedValueToEditID>";
@@ -160,7 +160,7 @@ function edit_item_form($itemToEditID, $itemToEdit) {
     echo "<div class='form-inline'>";
     
     echo "<form method='post'>"; // Form beginning
-        echo "<input id='Valor' type='text' name='Valor' placeholder='Item: $itemToEdit' >";
+        echo "<input id='Valor' type='text' name='Valor' placeholder='Item: $itemToEdit' pattern='[^0-9]+|(.|\s)*\S(.|\s)*'>";
         echo "<input type='hidden' name='Estado' value='Atualizar'>";
         echo "<input type='hidden' name='Tipo' value=$_REQUEST[Tipo]>";
         echo "<input type='hidden' name='ID' value=$itemToEditID>";

@@ -90,7 +90,7 @@ function unit_types_table($databaseConnection) {
 function insert_unit_type_form() {
 
     echo "<form method='post'>"; // Form beginning
-        echo "<input type='text' name='Nome' placeholder='Nova unidade'>";
+        echo "<input type='text' name='Nome' placeholder='Nova unidade' pattern='[^0-9]+|(.|\s)*\S(.|\s)*' >";
         echo "<input type='hidden' name='Estado' value='Inserir'>";
         echo "<input type='reset' value='Limpar'></input>"; //* Clear form button
         echo "<button> Submeter </button>";
