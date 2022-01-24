@@ -8,84 +8,76 @@ $link = connectToDatabase();
 
 // print_r("DEBUG2");
 
-//if(verifyLoginAndCapability('manage items')){ //problema na capability perguntar docente
-if(!isset($_REQUEST['estado'])){
-    $item="SELECT * FROM item";
-    $itemResult = mysqli_query($link, $item);
-    if(!$itemResult){
-        die('Não fez a query:' .mysqli_error() );
+if(is_user_logged_in() && current_user_can('search')) {
+    if (!isset($_REQUEST['estado'])) {
+        $item = "SELECT * FROM item";
+        $itemResult = mysqli_query($link, $item);
+        if (!$itemResult) {
+            die('Não fez a query:' . mysqli_error());
+        } else {
+            showTable();
+            form();
+        }
+    } else {
+        switch ($_REQUEST['estado']) {
+            case 'inserir':
+                form_validation();
+                break;
+
+            case 'editar':
+                //            echo "editar";
+                $itemID = $_REQUEST['item'];
+                //            echo"{$itemID}";
+                editar($itemID);
+                break;
+
+            case 'ativar':
+                $itemID = $_REQUEST['item'];
+                $queryActivate = "UPDATE item SET state='active' WHERE item.id={$itemID}";
+                $activateStateResult = mysqli_query($link, $queryActivate);
+                if (!$activateStateResult) {
+                    die('Não fez a query ativar estado:' . mysqli_error());
+                } else {
+                    echo "Atualizou o estado do item com sucesso.<br>";
+                    echo "Clique em <a href={$current_page}>Continuar</a> para avançar";
+                }
+                break;
+
+            case 'desativar':
+                $itemID = $_REQUEST['item'];
+                $queryDeactivate = "UPDATE item SET state='inactive' WHERE item.id={$itemID}";
+                $deactivateStateResult = mysqli_query($link, $queryDeactivate);
+                if (!$deactivateStateResult) {
+                    die('Não fez a query desativar estado:' . mysqli_error());
+                } else {
+                    echo "Atualizou o estado do item com sucesso.<br>";
+                    echo "Clique em <a href={$current_page}>Continuar</a> para avançar";
+                }
+                break;
+            case 'editUpdate':
+                $updateitemNameEdit = $_REQUEST['itemNameEdit'];
+                $updateItemTypeName = $_REQUEST['itemTypeName'];
+                $updateStateEdit = $_REQUEST['stateEdit'];
+                $updateItemID = $_REQUEST['itemEditID'];
+
+                echo "{$updateitemNameEdit}=updateitemNameEdit <br>";
+                echo "{$updateItemTypeName}=updateItemTypeName <br>";
+                echo "{$updateStateEdit}=updateStateEdit <br>";
+                echo "{$updateItemID}=updateItemID <br>";
+                echo "editUpdate <br>";
+
+
+                break;
+        }
     }
-    else{
-        showTable();
-        form();
-    }
+}else{
+    echo"Não tem autorização para aceder a esta página";
 }
-else{
-    switch ($_REQUEST['estado']){
-        case 'inserir':
-            form_validation();
-            break;
 
-        case 'editar':
-//            echo "editar";
-            $itemID=$_REQUEST['item'];
-//            echo"{$itemID}";
-            editar($itemID);
-            break;
-
-        case 'ativar':
-            $itemID=$_REQUEST['item'];
-            $queryActivate="UPDATE item SET state='active' WHERE item.id={$itemID}";
-            $activateStateResult = mysqli_query($link, $queryActivate);
-            if(!$activateStateResult){
-                die('Não fez a query ativar estado:' .mysqli_error() );
-            }
-            else{
-                echo"Atualizou o estado do item com sucesso.<br>";
-                echo"Clique em <a href={$current_page}>Continuar</a> para avançar";
-            }
-            break;
-
-        case 'desativar':
-            $itemID=$_REQUEST['item'];
-            $queryDeactivate="UPDATE item SET state='inactive' WHERE item.id={$itemID}";
-            $deactivateStateResult = mysqli_query($link, $queryDeactivate);
-            if(!$deactivateStateResult){
-                die('Não fez a query desativar estado:' .mysqli_error() );
-            }
-            else{
-                echo"Atualizou o estado do item com sucesso.<br>";
-                echo"Clique em <a href={$current_page}>Continuar</a> para avançar";
-            }
-            break;
-        case 'editUpdate':
-            $updateitemNameEdit=$_REQUEST['itemNameEdit'];
-            $updateItemTypeName=$_REQUEST['itemTypeName'];
-            $updateStateEdit=$_REQUEST['stateEdit'];
-            $updateItemID=$_REQUEST['itemEditID'];
-
-            echo"{$updateitemNameEdit}=updateitemNameEdit <br>";
-            echo"{$updateItemTypeName}=updateItemTypeName <br>";
-            echo"{$updateStateEdit}=updateStateEdit <br>";
-            echo"{$updateItemID}=updateItemID <br>";
-            echo"editUpdate <br>";
-
-
-            break;
-    }
-}
-/* if($_REQUEST['estado']=='inserir'){
-    form_validation();
-}*/
-
-//}
-/*else{
-    echo "Não tem autorização para aceder a esta página";
-    BackButton();
-}*/
 function showTable(){
     global $link,$current_page;
-    $itemType="SELECT id,name FROM item_type";
+    //if the post of the state is empty shows table
+    $itemType="SELECT id,name FROM item_type";    //query for item type, first column of the table
     $itemTypeResult = mysqli_query($link, $itemType);
 
     if(!$itemTypeResult){
@@ -106,7 +98,7 @@ function showTable(){
                 </tr>
             </thead>
             <tbody>";
-        while ($itemTypeTuples=mysqli_fetch_assoc($itemTypeResult)){
+        while ($itemTypeTuples=mysqli_fetch_assoc($itemTypeResult)){ //query for item, we search for the item type of the item using item_type.id, rest of the columns of the table
             $item="SELECT item.* FROM item,item_type 
                    where item.item_type_id=item_type.id AND item_type.id={$itemTypeTuples["id"]} 
                    ORDER BY item.name ASC";
@@ -126,7 +118,7 @@ function showTable(){
                     if ($itemTuples["state"]=='active'){
 
                         echo "<td>";
-
+                        //hyperlinks for edits a state changes
                         $editPageLink = get_bloginfo( 'wpurl' ) . "/edicao-de-dados" . "?Estado=Editar&Tipo=gestao-de-itens&ID=$itemTuples[id]";
                         echo "<a href=" . $editPageLink . ">[editar]</a> <br>";
 
@@ -135,8 +127,7 @@ function showTable(){
 
                         echo "</td></tr>";
 
-                        // echo "<td><a href={$current_page}?Estado=Editar&Tipo=gestao-de-itens&ID={$itemTuples['id']}>[editar]</a>";
-                        // echo"<a href={$current_page}?Estado=Desativar&ID={$itemTuples['id']}>[desativar]</a></td></tr>";
+
                     }
                     else{
 
@@ -152,8 +143,6 @@ function showTable(){
                         echo "</td></tr>";
 
 
-                        // echo "<td><a href={$current_page}?Estado=Editar&Tipo=gestao-de-itens&ID={$itemTuples['id']}>[editar]</a>";
-                        // echo"<a href={$current_page}?Estado=Ativar&ID={$itemTuples['id']}>[ativar]</a></td></tr>";
                     }
 
                 }
@@ -163,6 +152,7 @@ function showTable(){
     }
 }
 function form(){
+    //form bellow the table all are mandatory
     global $link,$current_page;
     echo "<h3>Gestão de itens - introdução</h3>";
     echo "<span style=color:red>*campo obrigatório</span><br>";
@@ -188,26 +178,23 @@ function form(){
 
 function form_validation(){
     global $itemName,$itemType,$itemState,$insert;
+    //verification of the form if its empty, or badly written iserts errors in array in common
     $error=array();
 
     if(empty($_REQUEST['itemName'])){
         array_push($error, "O nome é obrigatório");
-        /*echo"O nome é obrigatório <br>";
-        BackButton();*/
+
     }
     else{
         $itemName=$_REQUEST['itemName'];
         if(!preg_match("/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/",$itemName)){// /^[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+$/ ou ^[a-zA-z]*$/ check for hyphen
             array_push($error, "Só letras do alfabeto, espaços brancos e acentos, para o nome do item");
-            /*echo"Só letras do alfabeto, espaços brancos e acentos <br>";
-            BackButton();*/
+
         }
     }
     if(empty($_REQUEST['itemType'])){
         array_push($error, "Tipo de item é obrigatório");
 
-        /*echo"Tipo de item é obrigatório <br>";
-        BackButton();*/
     }
     else{
         $itemType=$_REQUEST['itemType'];
@@ -215,19 +202,19 @@ function form_validation(){
     if(empty($_REQUEST['state'])){
         array_push($error, "Estado é obrigatório");
 
-        /*echo"Estado é obrigatório <br>";
-        BackButton();*/
     }
     else{
         $itemState=$_REQUEST['state'];
     }
     if(validateInputs($error)){
+        //if theres no errors inserts into queries
         insert($itemName,$itemType,$itemState);
     }
 
 }
 
 function insert($itemName,$itemType,$itemState){
+    //inserts if form tuples into bd
     global $link,$current_page;
     $insertQuery="INSERT INTO item (name, item_type_id, state) VALUES ('{$itemName}', '{$itemType}', '{$itemState}')";
     $insertResult = mysqli_query($link, $insertQuery);
@@ -241,6 +228,7 @@ function insert($itemName,$itemType,$itemState){
 }
 
 function editar($itemID){
+    //edits item, by the item id
     global $link,$current_page;
     echo "<h3>Gestão de itens - editar item</h3>";
     echo"Dados atuais do item que quer editar:";

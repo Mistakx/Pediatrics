@@ -7,7 +7,6 @@ wp_enqueue_style('ag', get_bloginfo( 'wpurl' ) . '/custom/css/ag.css',false,'1.1
 
 //código da capibility "Manage_subitens"
 
-print_r("DEBUG\n");
 
 function handle_request($databaseConnection) {
 
@@ -33,9 +32,6 @@ function handle_request($databaseConnection) {
     }
 
 }
-
-
-
 
 function subitems_table($databaseConnection) {
 
@@ -139,38 +135,6 @@ function subitems_table($databaseConnection) {
 
 
 }
-
-
-
-
-
-
-// function form(){
-//     global $current_page;
-//     echo "<h3>Gestão de subitens - introdução</h3>";
-//     echo "<form method='post' action={$current_page}>
-//         <label for='name'>Nome:</label><span style=color:red>*campo obrigatório</span><br>
-//         <input type='text' id='itemName' name='itemName' ><br><br>";
-//     $subItem="SELECT DISTINCT id,name FROM item_type";
-//     $subItemResult = mysqli_query($link, $subItem);
-//     echo "
-//         <label for='tipo'>Tipo:</label><span style=color:red>*campo obrigatório</span><br>";
-//     while($subItemTuples=mysqli_fetch_assoc($subItemResult)){
-//          echo"<input type='radio' id={$subItemTuples["id"]} name='itemType' value={$subItemTuples["name"]}>{$subItemTuples["name"]}<br>";
-//     }
-//     echo"<br>
-//         <label>Estado:</label><span style=color:red>*campo obrigatório</span><br>
-//         <input type='radio' id='active' name='state' value='active'>ativo<br>
-//         <input type='radio' id='inactive' name='state' value='inactive'>inativo<br>
-//         <br>
-//         <input type = 'hidden' name = 'estado' value = 'inserir' />
-//         <input type = 'submit' name = 'submit' value = 'Inserir item' />
-//         </form> ";
-// }
-
-/*function insert(){
-
-}*/
 
 
 //* Verify if the user is logged in, and if it has the manage_subitems capability

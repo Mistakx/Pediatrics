@@ -129,29 +129,5 @@ function validateInputs($error){
     }
 }
 
-//! Pedro
-
-function verificar_string($string, $campo) {
-	if ($string == '') {
-		echo '<b>O campo ';  
-		echo $campo;
-		echo ' é obrigatório.</b>';
-		return false;
-	}
-	else return true;
-}
-
-function testar_permissão($capability) {
-    if (!is_user_logged_in() && !current_user_can($capability)) {
-        return false;
-    }
-    elseif(!current_user_can($capability)) {
-        return false;
-    }
-    else {
-        return true;
-    }
-}
-
 
 ?> 

@@ -65,7 +65,7 @@ function handle_request($databaseConnection) {
 
             }
 
-            else if ($_REQUEST['Tipo'] == "gestao-de-itens") { //* User activated allowed value
+            else if ($_REQUEST['Tipo'] == "gestao-de-itens") { //* User activated item
         
                 $itemToActivateID = $_REQUEST["ID"];
                 $databaseConnection->query("UPDATE item SET state = 'active' WHERE item.id = $itemToActivateID");
@@ -73,7 +73,13 @@ function handle_request($databaseConnection) {
                 echo "<a href=". get_bloginfo( 'wpurl' ) . "/gestao-de-itens>Confirmar.</a>\n"; 
             }
 
-
+            else if ($_REQUEST['Tipo'] == "gestao-de-subitens") { //* User activated subitem
+        
+                $subitemToActivateID = $_REQUEST["ID"];
+                $databaseConnection->query("UPDATE subitem SET state = 'active' WHERE subitem.id = $subitemToActivateID");
+                echo "Valor ativado com sucesso.\n";
+                echo "<a href=". get_bloginfo( 'wpurl' ) . "/gestao-de-subitens>Confirmar.</a>\n"; 
+            } 
 
         }
 
@@ -89,7 +95,7 @@ function handle_request($databaseConnection) {
     
             }
 
-            else if ($_REQUEST['Tipo'] == "gestao-de-itens") { //* User activated allowed value
+            else if ($_REQUEST['Tipo'] == "gestao-de-itens") { //* User deactivated item
         
                 $itemToDeactivateID = $_REQUEST["ID"];
                 $databaseConnection->query("UPDATE item SET state = 'inactive' WHERE item.id = $itemToDeactivateID");
@@ -97,7 +103,13 @@ function handle_request($databaseConnection) {
                 echo "<a href=". get_bloginfo( 'wpurl' ) . "/gestao-de-itens>Confirmar.</a>\n"; 
             }
 
-
+            else if ($_REQUEST['Tipo'] == "gestao-de-subitens") { //* User deactivated subitem
+        
+                $subitemToDeactivateID = $_REQUEST["ID"];
+                $databaseConnection->query("UPDATE subitem SET state = 'inactive' WHERE subitem.id = $subitemToDeactivateID");
+                echo "Valor desativado com sucesso.\n";
+                echo "<a href=". get_bloginfo( 'wpurl' ) . "/gestao-de-subitens>Confirmar.</a>\n"; 
+            }
 
         }
 
@@ -123,6 +135,13 @@ function handle_request($databaseConnection) {
                 $itemToEditToEdit = mysqli_fetch_assoc($itemToEditToEditQuery)["name"];
                 edit_item_form($itemToEditID, $itemToEditToEdit);
 
+            }
+    
+            if ($_REQUEST['Tipo'] == "gestao-de-subitens") { //* User editing manage items page
+        
+                echo "<h3>Edição de dados: Gestão de subitens</h3>"; 
+                echo "Infelizmente ficou por fazer após a desistência do meu colega.\n";
+          
             }
     
 

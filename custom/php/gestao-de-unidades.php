@@ -86,6 +86,8 @@ function unit_types_table($databaseConnection) {
             $subitemsString = rtrim($subitemsString, ", ");
             $subitemsString = $subitemsString . ".";
             echo $subitemsString;
+        } else {
+            echo "A unidade não tem subitems.";
         }
 
         echo "</td>";

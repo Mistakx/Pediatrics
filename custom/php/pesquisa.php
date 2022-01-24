@@ -1,10 +1,15 @@
 <?php
 require_once("custom/php/common.php");
+
 global $link,$current_page;
+$current_page = get_site_url().'/'.basename(get_permalink());
+$link = connectToDatabase();
+//$current_page = get_site_url().'/'.basename(get_permalink());
+//$link = connectToDatabase();
 //$link = mysqli_connect(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME);
 //$current_page = get_site_url().'/'.basename(get_permalink());
 if(is_user_logged_in() && current_user_can('search')){
-    echo "inside!";
+//    echo "inside!";
     if(!isset($_REQUEST['estado'])){
         choose_item();
     }
@@ -15,7 +20,7 @@ if(is_user_logged_in() && current_user_can('search')){
                 echo"<h3>Pesquisa - escolha</h3>";
                 $_SESSION['itemid']=$_REQUEST['item'];
                 $item_id =$_SESSION['itemid'];
-                echo $item_id;
+//                echo $item_id;
                 $itemnameid="SELECT item.* FROM item WHERE item.id={$item_id}";
                 $itemnameidResult = mysqli_query($link, $itemnameid);
                 if(!$itemnameidResult){
@@ -32,9 +37,22 @@ if(is_user_logged_in() && current_user_can('search')){
 
                 echo"escolher_filtros";
                 $item_id =$_SESSION['itemid'];
-                choose_filter($item_id);
+                $item_name = $_SESSION['itemname'];
+//                $obter=$_REQUEST['obter'];
+//                $filtro=$_REQUEST['filtrp'];
+                $item_name = $_SESSION['itemname'];
+                choose_filter($item_id,$item_name);
                 break;
+            case 'execucao':
 
+                echo"execucao";
+                $item_id =$_SESSION['itemid'];
+                $item_name = $_SESSION['itemname'];
+//                $obter=$_REQUEST['obter'];
+//                $filtro=$_REQUEST['filtrp'];
+                $item_name = $_SESSION['itemname'];
+                choose_filter($item_id,$item_name);
+                break;
         }
     }
 }else{
@@ -79,7 +97,7 @@ function choose_item(){
 }
 function choose($item_id,$item_name){
     global $link,$current_page;
-    echo"<br>chose ";
+//    echo"<br>chose ";
     echo "<form method='post' action={$current_page}>";
     $querycolname="SELECT GROUP_CONCAT(column_name ORDER BY ordinal_position SEPARATOR ', ') AS columns FROM information_schema.columns WHERE table_name = 'child'";
     $querycolnameResult = mysqli_query($link, $querycolname);
@@ -98,8 +116,8 @@ function choose($item_id,$item_name){
         foreach ($columnName as $value) {
             echo "<tr>"; // Begin table row
             echo "<td>{$value}</td>";
-            echo "<td><input type='checkbox' name='obter_{$value}' /></td>";
-            echo "<td><input type='checkbox' name='filtro_{$value}' /></td></tr>";
+            echo "<td><input type='checkbox' name='obter[]' value='{$value}' /></td>";// name=filtros[''] value=$value
+            echo "<td><input type='checkbox' name='filtro[]' value='{$value}' /></td></tr>";
         }
         echo "</table>";
 
@@ -119,8 +137,8 @@ function choose($item_id,$item_name){
         while( $subitemTuples = mysqli_fetch_assoc($querysubitensResult)){
             echo "<tr>"; // Begin table row
             echo "<td>{$subitemTuples['name']}</td>";
-            echo "<td><input type='checkbox' name='obter_{$subitemTuples['id']}' /></td>";
-            echo "<td><input type='checkbox' name='filtro_{$subitemTuples['id']}' /></td></tr>";
+            echo "<td><input type='checkbox' name='obter_sub[]' value='{$subitemTuples['id']}' /></td>";
+            echo "<td><input type='checkbox' name='filtro_sub[]' value='{$subitemTuples['id']}' /></td></tr>";
         }echo "</table>";
     }
     echo "<input type = 'hidden' name = 'estado' value = 'escolher_filtros'>
@@ -129,10 +147,151 @@ function choose($item_id,$item_name){
 
 
 }
-function choose_filter($item_id){
+function choose_filter($item_id,$item_name){
     global $link,$current_page;
-    echo"<br>chose filter";
-    echo"<h3>Pesquisa - escolha</h3>";
+    echo"<br>chose filter afsrhrfm";
+    echo"<h3>Pesquisa - escolha</h3>"; //filtro  obter_sub  filtro_sub
+    echo "<form method='post' action={$current_page}>";
+    echo "<span style=color:red>*campo obrigatório</span><br>";
+    echo "<p style=color:DodgerBlue><b>Irá ser realizada uma pesquisa que irá obter, como resultado, uma listagem de, para cada criança com os seguintes dados pessoais escolhidos</b></p><br>";
+    echo"<table>";
 
+    $querycolname="SELECT GROUP_CONCAT(column_name ORDER BY ordinal_position SEPARATOR ', ') AS columns FROM information_schema.columns WHERE table_name = 'child'";
+    $querycolnameResult = mysqli_query($link, $querycolname);
+    if(!$querycolnameResult){
+        die('Não fez a query:Não é possivel obter o nome colunas' .mysqli_error() );
+    }
+    else {
+        $columnTuples = mysqli_fetch_assoc($querycolnameResult);
+        $columnName=explode(',',$columnTuples['columns']);
+        foreach ($columnName as $colname) {
+            if(!empty($_REQUEST['obter']) && empty($_REQUEST['filtro'])){
+                foreach($_REQUEST['obter'] as $value){
+                    if($value==$colname){//case theres 1 in the same row checked
+//                        echo "value : {$value}<br/>";
+                        echo"<tr><ul><td><li><input type = 'hidden' name = 'obterAtrQ[]' value = '{$value}'>{$value} </li></td>";
+                        echo "<td> </td>";
+                        echo "<td> </td>";
+                    }
+                }
+            }
+            elseif (empty($_REQUEST['obter']) && !empty($_REQUEST['filtro'])){//case theres 1 in the same row checked
+                foreach($_REQUEST['filtro'] as $value_filter){
+                    if($value_filter==$colname){
+                        echo"<tr><ul><td><li><input type = 'hidden' name = 'filterAtrQ[]' value = '{$value_filter}'>{$value_filter} </li></td>";
+                        echo "<td> <label>Operador: <span style=color:red>*</span></label> 
+                                <select name=operador[]>
+                                <option hidden disabled selected value> -- Choose operator  -- </option>
+                                <option value=>></option>
+                                <option value=>=></option>
+                                <option value='='>=</option>
+                                <option value='<'><</option>
+                                <option value='<='><=</option>
+                                <option value='!='>!=</option>
+                                <option value='LIKE '>LIKE </option>
+                            </select></td>";
+                        echo "<td> <label for='filter_child[]'>{$value_filter}:<span style=color:red>*</span></label><br> ";
+                        echo "<input type='text' name='filtroval[]' >  </td>";
+                    }
+                }
+            }
+            elseif (!empty($_REQUEST['obter']) && !empty($_REQUEST['filtro'])){
+                foreach($_REQUEST['obter'] as $value){
+                    foreach($_REQUEST['filtro'] as $value_filter){
+                        echo"<tr><ul>";
+                        if($value==$value_filter && $value==$colname){ //case theres 2 in the same row checked
+                            echo"<td><li><input type = 'hidden' name = 'filterAtrQ[]' value = '{$colname}'>{$colname} </li></td>";
+                             echo "<td> <label for='ope_child[]'>Operador: <span style=color:red>*</span></label> 
+                                <select name=operador[]>
+                                <option hidden disabled selected value> -- Choose operator  -- </option>
+                                <option value=>></option>
+                                <option value=>=></option>
+                                <option value='='>=</option>
+                                <option value='<'><</option>
+                                <option value='<='><=</option>
+                                <option value='!='>!=</option>
+                                <option value='LIKE '>LIKE </option>
+                            </select></td>";
+                             echo "<td> <label for='filter_child[]'>{$value_filter}:<span style=color:red>*</span></label><br>";
+                             echo "<input type='text' name='filtroval[]' >  </td>";
+                         }
+                    }
+
+                }
+            }
+        }
+    }
+
+    echo"<tr>";
+    echo"</ul></table>";
+    echo "<p style=color:DodgerBlue><b>e do item: *{$item_name}* uma listagem dos valores dos subitens</b></p><br>";
+    echo"<table>";
+    if(!empty($_REQUEST['obter_sub']) && empty($_REQUEST['filtro_sub'])){
+        foreach($_REQUEST['obter_sub'] as $obter_sub){
+            $querysubitens="SELECT DISTINCT subitem.* FROM subitem,item WHERE subitem.item_id=item.id AND item.id={$item_id} AND subitem.id={$obter_sub} AND subitem.state='active' ORDER BY form_field_order";
+            $querysubitensResult = mysqli_query($link, $querysubitens);
+            if(!$querysubitensResult){
+                die('Não fez a query:Não é possivel obter o nome colunas' .mysqli_error() );
+            }
+            else {
+                $subitemTuples = mysqli_fetch_assoc($querysubitensResult);
+            echo"<tr><ul><td><li><input type = 'hidden' name = 'obtersubQ[]' value = '{$subitemTuples['id']}'>{$subitemTuples['name']} </li></td>";
+            }
+        }
+    }
+    elseif(empty($_REQUEST['obter_sub']) && !empty($_REQUEST['filtro_sub'])){
+
+        foreach($_REQUEST['filtro_sub'] as $filtro_sub){
+            $querysubitens="SELECT DISTINCT subitem.* FROM subitem,item WHERE subitem.item_id=item.id AND item.id={$item_id} AND subitem.id={$filtro_sub} AND subitem.state='active' ORDER BY form_field_order";
+            $querysubitensResult = mysqli_query($link, $querysubitens);
+            if(!$querysubitensResult){
+                die('Não fez a query:Não é possivel obter o nome colunas' .mysqli_error() );
+            }
+            else {
+                $subitemTuples = mysqli_fetch_assoc($querysubitensResult);
+                echo"<tr><ul><td><li>{$subitemTuples['name']} </li></td>";
+                echo "<td> <label for='filter_child[]'>{$subitemTuples['name']}:<span style=color:red>*</span></label><br> ";
+                echo "<input type='text' name='filtroval[]' >  </td>";
+
+            }
+        }
+    }
+    elseif (!empty($_REQUEST['obter_sub']) && !empty($_REQUEST['filtro_sub'])){
+        foreach($_REQUEST['obter_sub'] as $obter_sub){
+            foreach($_REQUEST['filtro_sub'] as $filtro_sub){
+                if($obter_sub==$filtro_sub){
+                    $querysubitens="SELECT DISTINCT subitem.* FROM subitem,item WHERE subitem.item_id=item.id AND item.id={$item_id} AND subitem.id={$filtro_sub} AND subitem.state='active' ORDER BY form_field_order";
+                    $querysubitensResult = mysqli_query($link, $querysubitens);
+                    if(!$querysubitensResult){
+                        die('Não fez a query:Não é possivel obter o nome colunas' .mysqli_error() );
+                    }
+                    else {
+                        $subitemTuples = mysqli_fetch_assoc($querysubitensResult);
+                        echo"<tr><ul><td><li>{$subitemTuples['name']} </li></td>";
+                        echo "<td> <label for='ope_child[]'>Operador:</label>
+                             <span style=color:red>*</span><br>
+                            <select name=operador_sub[] >
+                            <option hidden disabled selected value> -- Choose operator  -- </option>
+                            <option value=>></option>
+                            <option value=>=></option>
+                            <option value='='>=</option>
+                            <option value='<'><</option>
+                            <option value='<='><=</option>
+                            <option value='!='>!=</option>
+                            <option value='LIKE '>LIKE </option>
+                        </select></td>";
+                        echo "<td> <label >{$subitemTuples['name']}:<span style=color:red>*</span></label><br> ";
+                        echo "<input type='text' name='filtroval[]' >  </td>";
+
+                    }
+                }
+            }
+        }
+    }
+    echo"<tr>";
+    echo"</ul></table>";
+    echo "<input type = 'hidden' name = 'estado' value = 'execucao'>
+    <input type = 'submit' name = 'submit' value = 'Inserir' >
+    </form> ";
 }
 ?>
