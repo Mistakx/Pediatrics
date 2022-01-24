@@ -140,8 +140,31 @@ function edit_allowed_value_form($allowedValueToEditID, $allowedValueToEditName)
 
     echo "<div class='form-inline'>";
     
-    echo "<form method='post'>"; // Form beginning
-        echo "<input id='Valor' type='text' name='Valor' placeholder='Valor permitido: $allowedValueToEditName' pattern='( ((?!^\d+$)^.+$) | (^(?!\s*$).+) )'>";
+    $validateForm = "<script>
+    function validateForm() {
+        let formValue = document.forms['edit_allowed_value_form']['Valor'].value;
+        //! Empty unit type name
+        if (formValue == '') { 
+            alert('O valor inserido foi vazio.');
+            return false;
+        }
+        //! Only numbers
+        if (/^\d+$/.test(formValue)){
+            alert('O valor inserido contém apenas números.');
+            return false;
+        }
+        //! Only whitespaces
+        if (!/\S/.test(formValue)){
+            alert('O valor inserido contém apenas espaços.');
+            return false;
+        }
+    }
+    </script>";
+
+    echo $validateForm;
+    
+    echo "<form method='post' name='edit_allowed_value_form' >"; // Form beginning
+        echo "<input id='Valor' type='text' name='Valor' placeholder='Valor permitido: $allowedValueToEditName' >";
         echo "<input type='hidden' name='Estado' value='Atualizar'>";
         echo "<input type='hidden' name='Tipo' value=$_REQUEST[Tipo]>";
         echo "<input type='hidden' name='ID' value=$allowedValueToEditID>";
@@ -159,8 +182,32 @@ function edit_item_form($itemToEditID, $itemToEdit) {
 
     echo "<div class='form-inline'>";
     
-    echo "<form method='post'>"; // Form beginning
-        echo "<input id='Valor' type='text' name='Valor' placeholder='Item: $itemToEdit' pattern='( ((?!^\d+$)^.+$) | (^(?!\s*$).+) )'>";
+    
+    $validateForm = "<script>
+    function validateForm() {
+        let formValue = document.forms['edit_item_form']['Valor'].value;
+        //! Empty unit type name
+        if (formValue == '') { 
+            alert('O valor inserido foi vazio.');
+            return false;
+        }
+        //! Only numbers
+        if (/^\d+$/.test(formValue)){
+            alert('O valor inserido contém apenas números.');
+            return false;
+        }
+        //! Only whitespaces
+        if (!/\S/.test(formValue)){
+            alert('O valor inserido contém apenas espaços.');
+            return false;
+        }
+    }
+    </script>";
+
+    echo $validateForm;
+
+    echo "<form method='post' name='edit_item_form' >"; // Form beginning
+        echo "<input id='Valor' type='text' name='Valor' placeholder='Item: $itemToEdit' >";
         echo "<input type='hidden' name='Estado' value='Atualizar'>";
         echo "<input type='hidden' name='Tipo' value=$_REQUEST[Tipo]>";
         echo "<input type='hidden' name='ID' value=$itemToEditID>";

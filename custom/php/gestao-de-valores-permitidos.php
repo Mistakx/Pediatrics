@@ -165,8 +165,31 @@ function allowed_values_table($databaseConnection) {
 function allowed_values_form($subitemID, $subitemName) {
     echo "<h3>Gestão de valores permitidos - introdução</h3>"; 
 
-    echo "<form method='post'>"; // Form beginning
-        echo "<input type='text' name='Valor' placeholder='Valor permitido ($subitemName)' pattern='( ((?!^\d+$)^.+$) | (^(?!\s*$).+) )'>";
+    $validateForm = "<script>
+    function validateForm() {
+        let formValue = document.forms['allowed-values-form']['Valor'].value;
+        //! Empty unit type name
+        if (formValue == '') { 
+            alert('O valor inserido foi vazio.');
+            return false;
+        }
+        //! Only numbers
+        if (/^\d+$/.test(formValue)){
+            alert('O valor inserido contém apenas números.');
+            return false;
+        }
+        //! Only whitespaces
+        if (!/\S/.test(formValue)){
+            alert('O valor inserido contém apenas espaços.');
+            return false;
+        }
+    }
+    </script>";
+
+    echo $validateForm;
+
+    echo "<form method='post' name='allowed-values-form' >"; // Form beginning
+        echo "<input type='text' name='Valor' placeholder='Valor permitido ($subitemName)' >";
         echo "<input type='hidden' name='Estado' value='Inserir'>";
         echo "<input type='reset' value='Limpar'></input>"; //* Clear form button
         echo "<button> Submeter </button>";

@@ -99,10 +99,33 @@ function unit_types_table($databaseConnection) {
 
 function insert_unit_type_form() {
 
-    echo "<form method='post'>"; // Form beginning
+    $validateForm = "<script>
+    function validateForm() {
+        let formValue = document.forms['insert_unit_type_form']['Nome'].value;
+        //! Empty unit type name
+        if (formValue == '') { 
+            alert('O valor inserido foi vazio.');
+            return false;
+        }
+        //! Only numbers
+        if (/^\d+$/.test(formValue)){
+            alert('O valor inserido contém apenas números.');
+            return false;
+        }
+        //! Only whitespaces
+        if (!/\S/.test(formValue)){
+            alert('O valor inserido contém apenas espaços.');
+            return false;
+        }
+    }
+    </script>";
+
+    echo $validateForm;
+
+    echo "<form method='post' name='insert_unit_type_form' onsubmit='return validateForm()' >"; // Form beginning
         // (?!^\d+$)^.+$ Not only digits
         // ^(?!\s*$).+ At least one non-space character
-        echo "<input type='text' name='Nome' placeholder='Nova unidade' pattern='( ((?!^\d+$)^.+$) | (^(?!\s*$).+) )' >";
+        echo "<input type='text' name='Nome' placeholder='Nova unidades' >";
         echo "<input type='hidden' name='Estado' value='Inserir'>";
         echo "<input type='reset' value='Limpar'></input>"; //* Clear form button
         echo "<button> Submeter </button>";
