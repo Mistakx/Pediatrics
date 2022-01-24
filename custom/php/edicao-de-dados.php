@@ -163,7 +163,7 @@ function edit_allowed_value_form($allowedValueToEditID, $allowedValueToEditName)
 
     echo $validateForm;
     
-    echo "<form method='post' name='edit_allowed_value_form' >"; // Form beginning
+    echo "<form method='post' name='edit_allowed_value_form' onsubmit='return validateForm()' >"; // Form beginning
         echo "<input id='Valor' type='text' name='Valor' placeholder='Valor permitido: $allowedValueToEditName' >";
         echo "<input type='hidden' name='Estado' value='Atualizar'>";
         echo "<input type='hidden' name='Tipo' value=$_REQUEST[Tipo]>";
@@ -206,7 +206,7 @@ function edit_item_form($itemToEditID, $itemToEdit) {
 
     echo $validateForm;
 
-    echo "<form method='post' name='edit_item_form' >"; // Form beginning
+    echo "<form method='post' name='edit_item_form' onsubmit='return validateForm()' >"; // Form beginning
         echo "<input id='Valor' type='text' name='Valor' placeholder='Item: $itemToEdit' >";
         echo "<input type='hidden' name='Estado' value='Atualizar'>";
         echo "<input type='hidden' name='Tipo' value=$_REQUEST[Tipo]>";

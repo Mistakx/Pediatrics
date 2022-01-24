@@ -188,7 +188,7 @@ function allowed_values_form($subitemID, $subitemName) {
 
     echo $validateForm;
 
-    echo "<form method='post' name='allowed-values-form' >"; // Form beginning
+    echo "<form method='post' name='allowed-values-form' onsubmit='return validateForm()'  >"; // Form beginning
         echo "<input type='text' name='Valor' placeholder='Valor permitido ($subitemName)' >";
         echo "<input type='hidden' name='Estado' value='Inserir'>";
         echo "<input type='reset' value='Limpar'></input>"; //* Clear form button
