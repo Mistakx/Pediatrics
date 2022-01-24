@@ -66,6 +66,14 @@ function validateNewElementByName($tupleName, $tupleNameDatabaseParameter, $data
             return 1;
         }
 
+        //! Input only has whitespaces
+        if (strlen(trim($tupleName)) == 0) {
+            echo "O valor $tupleName é inválido pois contém apenas espaços em branco.\n";
+            echo "<a href='javascript:history.back()'>Voltar atrás.</a>";
+            return 1;
+        }
+        
+
         $tupleAlreadyExists = FALSE;
         foreach ($databaseTuples as $databaseTuple) { // Check if tuple already exists in the database                
             if ($tupleName == $databaseTuple[$tupleNameDatabaseParameter]) {
@@ -120,5 +128,30 @@ function validateInputs($error){
         return true;
     }
 }
+
+//! Pedro
+
+function verificar_string($string, $campo) {
+	if ($string == '') {
+		echo '<b>O campo ';  
+		echo $campo;
+		echo ' é obrigatório.</b>';
+		return false;
+	}
+	else return true;
+}
+
+function testar_permissão($capability) {
+    if (!is_user_logged_in() && !current_user_can($capability)) {
+        return false;
+    }
+    elseif(!current_user_can($capability)) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
 
 ?> 

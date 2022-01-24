@@ -68,14 +68,24 @@ function unit_types_table($databaseConnection) {
 
         //* Query all the "subitems" that have the same "subitem type" of this loop "subitem unit type"
         $subitems = $databaseConnection->query("SELECT name, item_id FROM subitem WHERE subitem.unit_type_id = " . $subitemUnit["id"]);
+        $subitemsString = "";
         foreach($subitems as $subitem) { //* For each "subitem" that has the same "subitem type" of this loop "subitem type"
 
-            echo $subitem["name"];
+            $subitemsString = $subitemsString . $subitem["name"];
 
             // Query the "item" parent of the loop "subtitem"
             $item = $databaseConnection->query("SELECT name FROM item WHERE item.id = " . $subitem["item_id"]);
-            echo " (". $item->fetch_assoc()["name"] . "), ";
+            $subitemsString = $subitemsString . " (". $item->fetch_assoc()["name"] . "), ";
+            
 
+
+        }
+
+        // Remove the last "," if the unit had a subitem, and echo the subitems string.
+        if ($subitemsString != "") {
+            $subitemsString = rtrim($subitemsString, ", ");
+            $subitemsString = $subitemsString . ".";
+            echo $subitemsString;
         }
 
         echo "</td>";
@@ -90,7 +100,9 @@ function unit_types_table($databaseConnection) {
 function insert_unit_type_form() {
 
     echo "<form method='post'>"; // Form beginning
-        echo "<input type='text' name='Nome' placeholder='Nova unidade' pattern='[^0-9]+|(.|\s)*\S(.|\s)*' >";
+        // (?!^\d+$)^.+$ Not only digits
+        // ^(?!\s*$).+ At least one non-space character
+        echo "<input type='text' name='Nome' placeholder='Nova unidade' pattern='( ((?!^\d+$)^.+$) | (^(?!\s*$).+) )' >";
         echo "<input type='hidden' name='Estado' value='Inserir'>";
         echo "<input type='reset' value='Limpar'></input>"; //* Clear form button
         echo "<button> Submeter </button>";
